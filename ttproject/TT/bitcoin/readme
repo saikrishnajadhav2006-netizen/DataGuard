@@ -1,0 +1,36 @@
+User → Wallet: one-to-one
+Wallet → Transactions: one-to-many
+User → Login history: one-to-many
+Login entity → User: many-to-one
+
+User
+
+    id
+    username
+    password
+    Wallet
+
+Wallet
+    id
+    user_id
+    balance
+    created_at
+    Transaction
+
+Transaction
+    id
+    wallet_id
+    amount
+    type
+    created_at
+
+Login
+
+    id
+    user_id
+    login_time
+
+
+User ↔ Wallet = one-to-one
+Wallet ↔ Transactions = one-to-many
+User ↔ Login history = one-to-many / many-to-one

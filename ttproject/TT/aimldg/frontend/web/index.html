@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; line-height: 1.6; }
+        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        input { margin: 5px 0; padding: 8px; width: 250px; display: block; }
+        button { padding: 8px 15px; margin-top: 5px; cursor: pointer; }
+        #output { font-weight: bold; color: #333; background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    </style>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <h1>Student Management System</h1>
+
+    <!-- Output Status Message -->
+    <div class="section">
+        <h3>Status Log</h3>
+        <p id="output">Ready</p>
+    </div>
+
+    <!-- Create / Update Form -->
+    <div class="section">
+        <h2 id="form-title">Add / Update Student</h2>
+        <input type="number" id="id" placeholder="Student ID (leave blank for Create)">
+        <input type="text" id="name" placeholder="Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="text" id="ip" placeholder="IP Address">
+        
+        <button onclick="saveStudent()">Save (Create / Update)</button>
+    </div>
+
+    <!-- Fetch & List -->
+    <div class="section">
+        <h2>Student Records</h2>
+        <button onclick="readData()">Refresh Student List</button>
+        <pre id="data-list">Click refresh to load records...</pre>
+    </div>
+
+    <!-- Delete Section -->
+    <div class="section">
+        <h2>Delete Student</h2>
+        <input type="number" id="delete-id" placeholder="Enter Student ID to Delete">
+        <button onclick="deleteData()">Delete</button>
+    </div>
+
+</body>
+</html>

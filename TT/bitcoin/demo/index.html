@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto App - Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 8px; width: 300px; }
+        input { width: 100%; padding: 8px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 10px; font-size: 0.9rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label>Username</label>
+            <input type="text" id="username" required />
+            
+            <label>Password</label>
+            <input type="password" id="password" required />
+            
+            <button type="submit">Submit</button>
+        </form>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 1. Grab inputs from frontend
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const statusDiv = document.getElementById('status');
+
+            // 2. Package and send POST request to backend
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput,
+                        password: passwordInput
+                    })
+                });
+
+                // 3. Receive backend response
+                const result = await response.json();
+                
+                if (result.status === 200) {
+                    statusDiv.style.color = '#4ade80';
+                    statusDiv.textContent = result.msg + "! Welcome " + result.data.username;
+                } else {
+                    statusDiv.style.color = '#f87171';
+                    statusDiv.textContent = result.msg;
+                }
+            } catch (err) {
+                statusDiv.style.color = '#f87171';
+                statusDiv.textContent = "Backend connection failed";
+            }
+        });
+    </script>
+</body>
+</html>
