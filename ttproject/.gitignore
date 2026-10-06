@@ -1,9 +1,0 @@
-.env
-**/.env
-node_modules/
-frontend/dist/
-backend/target/
-semgrep-results.json
-*.log
-*.zip
-.DS_Store
