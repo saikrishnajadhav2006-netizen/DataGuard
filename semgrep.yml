@@ -1,13 +1,77 @@
 rules:
   - id: dataguard-java-system-out
     languages: [java]
-    message: Replace standard output with structured logging.
+    message: >
+      Replace System.out.println with structured logging (SLF4J/Logback).
+      Debug output in production code can leak sensitive information and
+      is not captured by log aggregation systems.
     severity: WARNING
     patterns:
       - pattern: System.out.println(...)
 
+  - id: dataguard-java-system-err
+    languages: [java]
+    message: >
+      Replace System.err.println with structured logging (SLF4J/Logback).
+    severity: WARNING
+    patterns:
+      - pattern: System.err.println(...)
+
   - id: dataguard-java-empty-catch
     languages: [java]
-    message: Do not swallow exceptions silently.
+    message: >
+      Empty catch block swallows exceptions silently. At minimum log the
+      error; prefer specific exception types over catching Exception.
     severity: ERROR
-    pattern-regex: 'catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}'
+    pattern: |
+      try { ... } catch ($E $X) { }
+
+  - id: dataguard-java-hardcoded-password
+    languages: [java]
+    message: >
+      Hardcoded password detected. Never store passwords or secrets in
+      source code. Use environment variables or a secrets manager.
+    severity: ERROR
+    pattern-either:
+      - pattern: String $PW = "..."; // where $PW matches /(?i)password|passwd|secret|token/
+      - pattern: |
+          $X.setPassword("...")
+
+  - id: dataguard-java-sql-string-concat
+    languages: [java]
+    message: >
+      SQL query built by string concatenation is vulnerable to SQL injection.
+      Use parameterised queries or a prepared statement instead.
+    severity: ERROR
+    pattern-either:
+      - pattern: |
+          "SELECT" + $X
+      - pattern: |
+          "INSERT" + $X
+      - pattern: |
+          "UPDATE" + $X
+      - pattern: |
+          "DELETE" + $X
+
+  - id: dataguard-python-hardcoded-secret
+    languages: [python]
+    message: >
+      Hardcoded secret detected. Use environment variables or a secrets manager.
+    severity: ERROR
+    pattern-regex: '(?i)(password|passwd|secret|api_key|token)\s*=\s*["\'][^"'']{4,}["\']'
+
+  - id: dataguard-python-print
+    languages: [python]
+    message: >
+      Use the logging module instead of print() for application output.
+    severity: WARNING
+    pattern: print(...)
+
+  - id: dataguard-js-console-log
+    languages: [javascript, typescript]
+    message: >
+      Remove console.log() debug statements before production. Use a
+      structured logging library instead.
+    severity: WARNING
+    pattern: console.log(...)
+

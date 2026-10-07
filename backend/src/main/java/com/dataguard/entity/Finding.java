@@ -8,25 +8,39 @@ public class Finding {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "review_id")
     private Review review;
-    
-    private String category; // e.g. "CODE_QUALITY", "SECURITY", "ARCHITECTURE"
-    private String severity; // e.g. "CRITICAL", "HIGH", "MEDIUM", "LOW"
-    
+
+    /** e.g. CODE_QUALITY, SECURITY, ARCHITECTURE */
+    private String category;
+
+    /** CRITICAL | HIGH | MEDIUM | LOW | INFO */
+    private String severity;
+
+    /** Which analyzer produced this finding: CODE_QUALITY, SEMGREP, ARCHITECTURE, AI */
+    private String source;
+
+    /** Rule or check ID, e.g. dataguard-java-system-out */
+    private String ruleId;
+
     private String title;
+
+    @Column(length = 2000)
+    private String description;
+
     private String filePath;
     private Integer lineNumber;
-    
+
     @Column(length = 2000)
     private String evidence;
-    
+
     @Column(length = 2000)
     private String recommendation;
-    
-    private String status; // e.g. "OPEN", "RESOLVED"
+
+    /** OPEN | RESOLVED */
+    private String status;
 
     public Finding() {}
 
@@ -42,8 +56,17 @@ public class Finding {
     public String getSeverity() { return this.severity; }
     public void setSeverity(String severity) { this.severity = severity; }
 
+    public String getSource() { return this.source; }
+    public void setSource(String source) { this.source = source; }
+
+    public String getRuleId() { return this.ruleId; }
+    public void setRuleId(String ruleId) { this.ruleId = ruleId; }
+
     public String getTitle() { return this.title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return this.description; }
+    public void setDescription(String description) { this.description = description; }
 
     public String getFilePath() { return this.filePath; }
     public void setFilePath(String filePath) { this.filePath = filePath; }
@@ -60,3 +83,4 @@ public class Finding {
     public String getStatus() { return this.status; }
     public void setStatus(String status) { this.status = status; }
 }
+

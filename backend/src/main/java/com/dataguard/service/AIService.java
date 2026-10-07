@@ -3,6 +3,8 @@ package com.dataguard.service;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.AIExplanation;
 import com.dataguard.repository.AIExplanationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,8 @@ import java.util.List;
 
 @Service
 public class AIService {
+
+    private static final Logger log = LoggerFactory.getLogger(AIService.class);
 
     private final ChatClient chatClient;
     private final AIExplanationRepository aiExplanationRepository;
@@ -46,7 +50,7 @@ public class AIService {
                 
                 aiExplanationRepository.save(explanation);
             } catch (Exception e) {
-                System.err.println("AI Provider unavailable or error: " + e.getMessage());
+                log.warn("AI Provider unavailable or error: {}", e.getMessage());
             }
         }
     }

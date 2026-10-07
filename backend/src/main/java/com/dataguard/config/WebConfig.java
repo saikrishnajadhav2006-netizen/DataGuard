@@ -9,10 +9,18 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Allow the React frontend to communicate with the Spring Boot backend
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173") // Vite default port
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOrigins(
+                        "http://localhost:5173",
+                        "http://localhost:5174"
+                )
+                .allowedMethods(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS"
+                )
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }

@@ -19,6 +19,11 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+
+
+
+
+    
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AuthDto.RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {

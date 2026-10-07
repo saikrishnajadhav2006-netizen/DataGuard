@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -14,7 +14,7 @@
     margin: 0;
     background-color: #f7f3fa;
     color: #29233a;
-    font-family: 'Clash Display', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
