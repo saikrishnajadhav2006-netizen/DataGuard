@@ -69,6 +69,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/github/webhook").permitAll()   // verified via HMAC, not JWT
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/github/status").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )

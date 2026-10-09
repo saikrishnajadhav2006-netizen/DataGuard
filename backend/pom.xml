@@ -95,7 +95,8 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+    
+</dependencies>
     
     <dependencyManagement>
         <dependencies>
@@ -106,7 +107,8 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-        </dependencies>
+        
+</dependencies>
     </dependencyManagement>
 
     <build>

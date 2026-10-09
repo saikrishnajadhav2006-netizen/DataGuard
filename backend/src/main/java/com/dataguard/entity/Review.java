@@ -32,6 +32,9 @@ public class Review {
     private LocalDateTime reviewDate;
     private LocalDateTime completedAt;
 
+    @Transient
+    private java.util.List<String> analysisWarnings = new java.util.ArrayList<>();
+
     @PrePersist
     public void prePersist() {
         this.reviewDate = LocalDateTime.now();
@@ -68,5 +71,11 @@ public class Review {
 
     public LocalDateTime getCompletedAt() { return this.completedAt; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public java.util.List<String> getAnalysisWarnings() { return analysisWarnings; }
+    public void setAnalysisWarnings(java.util.List<String> analysisWarnings) {
+        this.analysisWarnings = analysisWarnings == null ? new java.util.ArrayList<>() : new java.util.ArrayList<>(analysisWarnings);
+    }
 }
 

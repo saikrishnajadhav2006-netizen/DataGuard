@@ -43,6 +43,8 @@ public class CodeQualityAnalyzer {
             "catch\\s*\\([^)]*\\)\\s*\\{"
     );
 
+    private static final Pattern DYNAMIC_EVALUATION = Pattern.compile("\\beval\\s*\\(");
+
     public List<Finding> analyze(File projectDir, Review review) {
         List<Finding> findings = new ArrayList<>();
         scanDirectory(projectDir, projectDir, review, findings);
@@ -52,7 +54,7 @@ public class CodeQualityAnalyzer {
 
     private void scanDirectory(File dir, File rootDir, Review review, List<Finding> findings) {
         File[] files = dir.listFiles();
-        if (files == null) return;
+        if (files == null) throw new IllegalStateException("Could not list source directory " + dir.getName());
 
         for (File file : files) {
             if (file.isDirectory()) {
@@ -79,13 +81,12 @@ public class CodeQualityAnalyzer {
         try {
             lines = Files.readAllLines(file.toPath());
         } catch (IOException e) {
-            log.debug("Could not read file {}: {}", file.getName(), e.getMessage());
-            return;
+            throw new IllegalStateException("Could not analyze file " + file.getName(), e);
         }
 
         String relativePath = makeRelative(file, rootDir);
-        boolean isJava = file.getName().endsWith(".java");
-        boolean isPython = file.getName().endsWith(".py");
+        boolean isJava = file.getName().toLowerCase().endsWith(".java");
+        boolean isPython = file.getName().toLowerCase().endsWith(".py");
 
         boolean prevLineWasCatch = false;
 
@@ -167,6 +168,16 @@ public class CodeQualityAnalyzer {
                         relativePath, lineNum, trimmed,
                         "Use a structured logger (log.error(\"msg\", exception)) instead of " +
                         "printStackTrace() so stack traces are captured by your logging infrastructure."));
+            }
+
+            // Rule 7: Dynamic evaluation can execute attacker-controlled input.
+            if (!trimmed.startsWith("//") && !trimmed.startsWith("#") && !trimmed.startsWith("*")
+                    && DYNAMIC_EVALUATION.matcher(trimmed).find()) {
+                findings.add(createFinding(review, "sec-dynamic-evaluation",
+                        "Dynamic code evaluation",
+                        "SECURITY", "HIGH",
+                        relativePath, lineNum, trimmed,
+                        "Avoid eval() on application data. Parse input with a data-only parser or use an explicit allowlist."));
             }
         }
     }

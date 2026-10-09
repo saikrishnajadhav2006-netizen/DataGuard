@@ -2,7 +2,7 @@ package com.dataguard.service;
 
 import com.dataguard.analyzer.ArchitectureAnalyzer;
 import com.dataguard.analyzer.CodeQualityAnalyzer;
-import com.dataguard.analyzer.SemgrepAnalyzer;
+
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Project;
 import com.dataguard.entity.Review;
@@ -49,7 +49,8 @@ public class ReviewEngine {
     private final ReviewRepository reviewRepository;
     private final FindingRepository findingRepository;
     private final CodeQualityAnalyzer codeQualityAnalyzer;
-    private final SemgrepAnalyzer semgrepAnalyzer;
+    private final com.dataguard.analyzer.PMDAnalyzer pmdAnalyzer;
+    private final com.dataguard.analyzer.DependencyCheckAnalyzer dependencyCheckAnalyzer;
     private final ArchitectureAnalyzer architectureAnalyzer;
     private final ScoringService scoringService;
     private final AIService aiService;
@@ -58,7 +59,7 @@ public class ReviewEngine {
             ReviewRepository reviewRepository,
             FindingRepository findingRepository,
             CodeQualityAnalyzer codeQualityAnalyzer,
-            SemgrepAnalyzer semgrepAnalyzer,
+            com.dataguard.analyzer.PMDAnalyzer pmdAnalyzer, com.dataguard.analyzer.DependencyCheckAnalyzer dependencyCheckAnalyzer,
             ArchitectureAnalyzer architectureAnalyzer,
             ScoringService scoringService,
             AIService aiService) {
@@ -66,7 +67,8 @@ public class ReviewEngine {
         this.reviewRepository = reviewRepository;
         this.findingRepository = findingRepository;
         this.codeQualityAnalyzer = codeQualityAnalyzer;
-        this.semgrepAnalyzer = semgrepAnalyzer;
+        this.pmdAnalyzer = pmdAnalyzer;
+        this.dependencyCheckAnalyzer = dependencyCheckAnalyzer;
         this.architectureAnalyzer = architectureAnalyzer;
         this.scoringService = scoringService;
         this.aiService = aiService;
@@ -96,6 +98,7 @@ public class ReviewEngine {
         final Review currentReview = review;
 
         List<Finding> allFindings = new ArrayList<>();
+        List<String> failedAnalyzers = new ArrayList<>();
 
         try {
 
@@ -112,21 +115,24 @@ public class ReviewEngine {
                     () -> codeQualityAnalyzer.analyze(
                             extractedDir,
                             currentReview
-                    )
+                    ), failedAnalyzers
             );
 
             allFindings.addAll(qualityFindings);
 
-            // Semgrep security/static analysis
-            List<Finding> semgrepFindings = runAnalyzer(
-                    "Semgrep",
-                    () -> semgrepAnalyzer.analyze(
-                            extractedDir,
-                            currentReview
-                    )
+            // PMD security/static analysis
+            List<Finding> pmdFindings = runAnalyzer(
+                    "PMD",
+                    () -> pmdAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers
             );
+            allFindings.addAll(pmdFindings);
 
-            allFindings.addAll(semgrepFindings);
+            // Dependency Check analysis
+            List<Finding> depFindings = runAnalyzer(
+                    "Dependency Check",
+                    () -> dependencyCheckAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers
+            );
+            allFindings.addAll(depFindings);
 
             // Architecture analysis
             List<Finding> archFindings = runAnalyzer(
@@ -134,7 +140,7 @@ public class ReviewEngine {
                     () -> architectureAnalyzer.analyze(
                             extractedDir,
                             currentReview
-                    )
+                    ), failedAnalyzers
             );
 
             allFindings.addAll(archFindings);
@@ -149,9 +155,10 @@ public class ReviewEngine {
                     currentReview,
                     allFindings
             );
+            currentReview.setAnalysisWarnings(failedAnalyzers);
 
             // 5. Mark review as completed
-            currentReview.setStatus("COMPLETED");
+            currentReview.setStatus(failedAnalyzers.isEmpty() ? "COMPLETED" : "INCOMPLETE");
             currentReview.setCompletedAt(LocalDateTime.now());
 
             review = reviewRepository.save(currentReview);
@@ -162,6 +169,9 @@ public class ReviewEngine {
                     allFindings.size(),
                     currentReview.getOverallScore()
             );
+            if (!failedAnalyzers.isEmpty()) {
+                log.warn("Review #{} is incomplete; analyzer(s) failed: {}", currentReview.getId(), failedAnalyzers);
+            }
 
         } catch (Exception e) {
 
@@ -219,23 +229,28 @@ public class ReviewEngine {
      */
     private List<Finding> runAnalyzer(
             String name,
-            AnalyzerTask task) {
+            AnalyzerTask task,
+            List<String> failedAnalyzers) {
 
         try {
 
             List<Finding> results = task.run();
 
+            if (results == null) {
+                throw new IllegalStateException("Analyzer returned no result list");
+            }
+
             log.info(
                     "{} analyzer: {} finding(s)",
                     name,
-                    results == null ? 0 : results.size()
+                    results.size()
             );
 
-            return results != null
-                    ? results
-                    : List.of();
+            return results;
 
         } catch (Exception e) {
+
+            failedAnalyzers.add(name + (e.getMessage() == null ? " failed" : ": " + e.getMessage()));
 
             log.error(
                     "{} analyzer threw an unexpected exception: {}",

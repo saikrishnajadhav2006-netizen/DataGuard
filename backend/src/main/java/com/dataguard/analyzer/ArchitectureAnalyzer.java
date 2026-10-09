@@ -42,7 +42,7 @@ public class ArchitectureAnalyzer {
 
     private void scanDirectory(File dir, File rootDir, Review review, List<Finding> findings) {
         File[] files = dir.listFiles();
-        if (files == null) return;
+        if (files == null) throw new IllegalStateException("Could not list source directory " + dir.getName());
 
         for (File file : files) {
             if (file.isDirectory()) {
@@ -63,8 +63,7 @@ public class ArchitectureAnalyzer {
         try {
             lines = Files.readAllLines(file.toPath());
         } catch (IOException e) {
-            log.debug("Could not read file for architecture analysis: {}", file.getName());
-            return;
+            throw new IllegalStateException("Could not analyze file " + file.getName(), e);
         }
 
         String fileName = file.getName();
