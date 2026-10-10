@@ -1,6 +1,10 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 import { supabase } from './supabase';
 
+// Spring Boot JWT is the default provider. Supabase Auth is opt-in only, so
+// setting database variables for Aiven cannot silently switch the auth system.
+const useSupabaseAuth = import.meta.env.VITE_AUTH_PROVIDER === 'supabase' && Boolean(supabase);
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -22,7 +26,7 @@ async function request(path, options = {}) {
 }
 
 export async function authenticate(path, payload) {
-  if (supabase && path === '/api/auth/register') {
+  if (useSupabaseAuth && path === '/api/auth/register') {
     const { data, error } = await supabase.auth.signUp({
       email: payload.email,
       password: payload.password,
@@ -33,7 +37,7 @@ export async function authenticate(path, payload) {
     return { token: data.session.access_token, email: data.user.email, fullName: payload.fullName };
   }
 
-  if (supabase && path === '/api/auth/login') {
+  if (useSupabaseAuth && path === '/api/auth/login') {
     const { data, error } = await supabase.auth.signInWithPassword({ email: payload.email, password: payload.password });
     if (error) throw error;
     return { token: data.session.access_token, email: data.user.email, fullName: data.user.user_metadata?.full_name || data.user.email };
