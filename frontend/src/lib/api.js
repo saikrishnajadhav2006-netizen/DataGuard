@@ -1,7 +1,7 @@
 const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 async function request(path, options = {}) {
-  const response = await fetch(\`\${API_URL}\${path}\`, {
+  const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
@@ -32,24 +32,24 @@ export function uploadProject(name, file, token) {
   return request('/api/projects/upload', {
     method: 'POST',
     body: formData,
-    headers: { Authorization: \`Bearer \${token}\` },
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 export function generateFix(reviewId, findingId) {
   let auth = {};
   try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* malformed session */ }
-  return request(\`/api/projects/reviews/\${reviewId}/findings/\${findingId}/fix\`, {
+  return request(`/api/projects/reviews/${reviewId}/findings/${findingId}/fix`, {
     method: 'POST',
-    headers: { Authorization: \`Bearer \${auth.token || ''}\` },
+    headers: { Authorization: `Bearer ${auth.token || ''}` },
   });
 }
 
 export async function downloadReviewedProject(reviewId, projectName) {
   let auth = {};
   try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* malformed session */ }
-  const response = await fetch(\`\${API_URL}/api/projects/reviews/\${reviewId}/download\`, {
-    headers: { Authorization: \`Bearer \${auth.token || ''}\` },
+  const response = await fetch(`${API_URL}/api/projects/reviews/${reviewId}/download`, {
+    headers: { Authorization: `Bearer ${auth.token || ''}` },
   });
   if (!response.ok) {
     const text = await response.text();
@@ -59,7 +59,7 @@ export async function downloadReviewedProject(reviewId, projectName) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = \`\${(projectName || 'dataguard-project').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'dataguard-project'}-reviewed.zip\`;
+  anchor.download = `${(projectName || 'dataguard-project').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'dataguard-project'}-reviewed.zip`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
