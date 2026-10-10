@@ -5,6 +5,7 @@ import com.dataguard.dto.ReviewResponse;
 import com.dataguard.entity.Finding;
 import com.dataguard.repository.FindingRepository;
 import com.dataguard.repository.ProjectRepository;
+import com.dataguard.repository.ReviewRepository;
 import com.dataguard.entity.Review;
 import com.dataguard.entity.User;
 import com.dataguard.repository.UserRepository;
@@ -33,6 +34,7 @@ public class ProjectController {
     private final UserRepository userRepository;
     private final FindingRepository findingRepository;
     private final ProjectRepository projectRepository;
+    private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/upload")
@@ -77,10 +79,12 @@ public class ProjectController {
         return userRepository.save(user);
     }
 
-    @GetMapping("/{projectId}/download")
-    public ResponseEntity<?> downloadReviewedProject(@PathVariable Long projectId, Authentication authentication) {
-        var project = projectRepository.findById(projectId).orElse(null);
-        if (project == null) return ResponseEntity.notFound().build();
+    @GetMapping("/reviews/{reviewId}/download")
+    public ResponseEntity<?> downloadReviewedProject(@PathVariable Long reviewId, Authentication authentication) {
+        var review = reviewRepository.findById(reviewId).orElse(null);
+        if (review == null) return ResponseEntity.notFound().build();
+        var project = review.getProject();
+        Long projectId = project.getId();
         if (!project.getUser().getEmail().equalsIgnoreCase(authenticationEmail(authentication))) {
             return ResponseEntity.status(403).body("You do not have access to this project.");
         }
@@ -139,11 +143,12 @@ public class ProjectController {
     }
 
     public ProjectController(ProjectService projectService, UserRepository userRepository, FindingRepository findingRepository,
-                             ProjectRepository projectRepository, PasswordEncoder passwordEncoder) {
+                             ProjectRepository projectRepository, ReviewRepository reviewRepository, PasswordEncoder passwordEncoder) {
         this.projectService = projectService;
         this.userRepository = userRepository;
         this.findingRepository = findingRepository;
         this.projectRepository = projectRepository;
+        this.reviewRepository = reviewRepository;
         this.passwordEncoder = passwordEncoder;
     }
 }
