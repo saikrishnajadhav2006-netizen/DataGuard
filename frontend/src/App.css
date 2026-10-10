@@ -98,3 +98,22 @@ button { cursor: pointer; }
   .auth-form-side input { border-radius: 14px; }
   .auth-topbar { padding-inline: 18px; }
 }
+
+/* Auth layout guardrails */
+.auth-form-side { min-width: 0; gap: 16px; }
+.auth-form-side h1 { margin: 0; line-height: 1.15; }
+.auth-divider { margin: 0; line-height: 1.5; }
+.auth-form-side form { gap: 14px; }
+.auth-form-side input { min-height: 50px; }
+.auth-submit { min-width: 132px; min-height: 48px; cursor: pointer; }
+.auth-submit:disabled { opacity: .65; cursor: wait; }
+.form-error { width: 100%; margin: 0; color: #fb7185; font-size: 14px; text-align: left; overflow-wrap: anywhere; }
+.auth-welcome-side { min-width: 0; }
+@media (max-width: 850px) {
+  .auth-split-card { width: min(100% - 28px, 540px); min-height: 0; margin: 22px auto; }
+  .auth-form-side { min-height: 0; padding: clamp(24px, 7vw, 42px); }
+  .auth-form-side form { width: 100%; }
+  .auth-form-side input { border-radius: 14px; }
+  .auth-topbar { padding-inline: 18px; }
+  .auth-welcome-side { display: none; }
+}
