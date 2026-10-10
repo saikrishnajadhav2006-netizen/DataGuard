@@ -43,7 +43,7 @@ input,textarea{background:var(--card);border:1px solid var(--bd);border-radius:1
 .oc{position:absolute;top:0;left:50%;width:50%;height:100%;overflow:hidden;transition:all .6s ease;z-index:100;border-radius:120px 0 0 120px}.box.act .oc{transform:translateX(-100%);border-radius:0 120px 120px 0}
 .ov{background:var(--ag);color:var(--onb);position:relative;left:-100%;height:100%;width:200%;transition:transform .6s ease}.box.act .ov{transform:translateX(50%)}
 .op{position:absolute;top:0;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 44px;transition:transform .6s ease}.op h2{font-size:32px}.ol{transform:translateX(-20%)}.or{right:0}.box.act .ol{transform:translateX(0)}.box.act .or{transform:translateX(20%)}
-.ov .btn{background:transparent;border:2px solid var(--onb);color:var(--onb);box-shadow:none}.mob{display:none;color:var(--a2);font-weight:700;cursor:pointer}
+.ov .btn{background:transparent;border:2px solid var(--onb);color:var(--onb);box-shadow:none}.mob{display:block;color:var(--a2);font-weight:700;cursor:pointer;margin-top:4px}.fc .mob:hover{text-decoration:underline}.fc [data-login]:disabled{opacity:.7;cursor:wait}.fc [role=alert]:empty{display:none}.fc [role=alert]{min-height:0;margin:0;font-size:13px}
 /* dashboard */
 .app{display:flex;height:calc(100vh - var(--pb,44px));min-height:600px;overflow:hidden;position:relative}
 .side{width:264px;flex:none;margin:12px 0 12px 12px;border-radius:26px;background:var(--sbg);backdrop-filter:blur(18px);border:1px solid var(--bd);box-shadow:var(--sh);color:var(--sbt);display:flex;flex-direction:column;padding:14px 12px;transition:margin .3s;min-height:0;z-index:30;position:relative}
@@ -454,6 +454,26 @@ run();
   window.finish = function () { submitAuth(document.querySelector('#box')?.classList.contains('act') ? 'register' : 'login'); };
   document.querySelectorAll('.fc.su [data-login]').forEach(b => b.onclick = () => submitAuth('register'));
   document.querySelectorAll('.fc.si [data-login]').forEach(b => b.onclick = () => submitAuth('login'));
+  // Keep the sign-in/sign-up switch visible on desktop and mobile, and support Enter-to-submit.
+  document.querySelectorAll('[data-sw]').forEach(b => b.addEventListener('click', () => {
+    const box = $id('box');
+    if (box) box.classList.toggle('act', b.dataset.sw === '1');
+    showError('dg-auth-error-login', '');
+    showError('dg-auth-error-register', '');
+  }));
+  ['dg-register-name','dg-register-email','dg-register-password','dg-login-email','dg-login-password'].forEach(id => {
+    const field = $id(id);
+    if (!field) return;
+    field.addEventListener('input', () => {
+      showError(id.startsWith('dg-register-') ? 'dg-auth-error-register' : 'dg-auth-error-login', '');
+    });
+    field.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitAuth(id.startsWith('dg-register-') ? 'register' : 'login');
+      }
+    });
+  });
   document.querySelectorAll('[data-out]').forEach(b => b.onclick = window.signOutUser);
   if ($id('navReg')) $id('navReg').onclick = () => { $id('box').classList.add('act'); window.go('auth'); };
   if ($id('navLog')) $id('navLog').onclick = () => { $id('box').classList.remove('act'); window.go('auth'); };
