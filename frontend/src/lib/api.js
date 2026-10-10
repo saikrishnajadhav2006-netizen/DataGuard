@@ -1,11 +1,7 @@
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/$/, '');
-import { supabase } from './supabase';
-
-// Aiven is the PostgreSQL database; Spring Boot JWT is the default auth provider.
-const useSupabaseAuth = import.meta.env.VITE_AUTH_PROVIDER === 'supabase' && Boolean(supabase);
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(\`\${API_URL}\${path}\`, {
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
@@ -21,22 +17,10 @@ async function request(path, options = {}) {
   return body;
 }
 
-export async function authenticate(path, payload) {
-  if (useSupabaseAuth && path === '/api/auth/register') {
-    const { data, error } = await supabase.auth.signUp({
-      email: payload.email,
-      password: payload.password,
-      options: { data: { full_name: payload.fullName } },
-    });
-    if (error) throw error;
-    if (!data.session) throw new Error('Registration succeeded. Confirm your email before signing in.');
-    return { token: data.session.access_token, email: data.user.email, fullName: payload.fullName };
-  }
-  if (useSupabaseAuth && path === '/api/auth/login') {
-    const { data, error } = await supabase.auth.signInWithPassword({ email: payload.email, password: payload.password });
-    if (error) throw error;
-    if (!data.session) throw new Error('No active session returned by authentication provider.');
-    return { token: data.session.access_token, email: data.user.email, fullName: data.user.user_metadata?.full_name || data.user.email };
+// Spring Boot handles auth. Users and BCrypt password hashes live in Aiven PostgreSQL.
+export function authenticate(path, payload) {
+  if (path !== '/api/auth/register' && path !== '/api/auth/login') {
+    throw new Error('Unsupported authentication request.');
   }
   return request(path, { method: 'POST', body: JSON.stringify(payload) });
 }
@@ -48,24 +32,24 @@ export function uploadProject(name, file, token) {
   return request('/api/projects/upload', {
     method: 'POST',
     body: formData,
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: \`Bearer \${token}\` },
   });
 }
 
 export function generateFix(reviewId, findingId) {
   let auth = {};
-  try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* expired or malformed session */ }
-  return request(`/api/projects/reviews/${reviewId}/findings/${findingId}/fix`, {
+  try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* malformed session */ }
+  return request(\`/api/projects/reviews/\${reviewId}/findings/\${findingId}/fix\`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${auth.token || ''}` },
+    headers: { Authorization: \`Bearer \${auth.token || ''}\` },
   });
 }
 
-export async function downloadReviewedProject(projectId, projectName) {
+export async function downloadReviewedProject(reviewId, projectName) {
   let auth = {};
-  try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* expired or malformed session */ }
-  const response = await fetch(`${API_URL}/api/projects/reviews/${projectId}/download`, {
-    headers: { Authorization: `Bearer ${auth.token || ''}` },
+  try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* malformed session */ }
+  const response = await fetch(\`\${API_URL}/api/projects/reviews/\${reviewId}/download\`, {
+    headers: { Authorization: \`Bearer \${auth.token || ''}\` },
   });
   if (!response.ok) {
     const text = await response.text();
@@ -75,7 +59,7 @@ export async function downloadReviewedProject(projectId, projectName) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `${(projectName || 'dataguard-project').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'dataguard-project'}-reviewed.zip`;
+  anchor.download = \`\${(projectName || 'dataguard-project').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'dataguard-project'}-reviewed.zip\`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
