@@ -14,10 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,8 +33,11 @@ public class AuthController {
                 || isBlank(request.getEmail()) || isBlank(request.getPassword())) {
             return ResponseEntity.badRequest().body("Full name, email, and password are required.");
         }
-        if (request.getPassword().length() < 6) {
-            return ResponseEntity.badRequest().body("Password must contain at least 6 characters.");
+        if (!EMAIL_PATTERN.matcher(request.getEmail().trim()).matches()) {
+            return ResponseEntity.badRequest().body("Enter a valid email address.");
+        }
+        if (request.getPassword().length() < 8 || request.getPassword().length() > 72) {
+            return ResponseEntity.badRequest().body("Password must contain between 8 and 72 characters.");
         }
 
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
@@ -60,6 +66,9 @@ public class AuthController {
         }
 
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            return ResponseEntity.badRequest().body("Enter a valid email address.");
+        }
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, request.getPassword()));
