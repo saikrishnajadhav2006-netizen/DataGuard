@@ -4,11 +4,15 @@ import com.dataguard.dto.FixResponse;
 import com.dataguard.dto.ReviewResponse;
 import com.dataguard.entity.Finding;
 import com.dataguard.repository.FindingRepository;
+import com.dataguard.repository.ProjectRepository;
 import com.dataguard.entity.Review;
 import com.dataguard.entity.User;
 import com.dataguard.repository.UserRepository;
 import com.dataguard.service.ProjectService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -16,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -24,6 +32,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final UserRepository userRepository;
     private final FindingRepository findingRepository;
+    private final ProjectRepository projectRepository;
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/upload")
@@ -68,6 +77,34 @@ public class ProjectController {
         return userRepository.save(user);
     }
 
+    @GetMapping("/{projectId}/download")
+    public ResponseEntity<?> downloadReviewedProject(@PathVariable Long projectId, Authentication authentication) {
+        var project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) return ResponseEntity.notFound().build();
+        if (!project.getUser().getEmail().equalsIgnoreCase(authenticationEmail(authentication))) {
+            return ResponseEntity.status(403).body("You do not have access to this project.");
+        }
+        Path root = Path.of(System.getProperty("java.io.tmpdir"), "dataguard_" + projectId).toAbsolutePath().normalize();
+        if (!Files.isDirectory(root)) {
+            return ResponseEntity.status(410).body("Temporary project files are no longer available. Please upload the ZIP again.");
+        }
+        String safeName = project.getName() == null ? "dataguard-project" : project.getName().replaceAll("[^A-Za-z0-9_-]", "-");
+        StreamingResponseBody stream = output -> {
+            try (ZipOutputStream zip = new ZipOutputStream(output); var paths = Files.walk(root)) {
+                for (Path path : paths.filter(Files::isRegularFile).toList()) {
+                    Path normalized = path.toAbsolutePath().normalize();
+                    if (!normalized.startsWith(root)) continue;
+                    String entryName = root.relativize(normalized).toString().replace((char)92, '/');
+                    zip.putNextEntry(new ZipEntry(entryName));
+                    Files.copy(normalized, zip);
+                    zip.closeEntry();
+                }
+                zip.finish();
+            }
+        };
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeName + "-reviewed.zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).body(stream);
+    }
     @PostMapping("/reviews/{reviewId}/findings/{findingId}/fix")
     public ResponseEntity<?> suggestFix(
             @PathVariable Long reviewId,
@@ -102,10 +139,11 @@ public class ProjectController {
     }
 
     public ProjectController(ProjectService projectService, UserRepository userRepository, FindingRepository findingRepository,
-                             PasswordEncoder passwordEncoder) {
+                             ProjectRepository projectRepository, PasswordEncoder passwordEncoder) {
         this.projectService = projectService;
         this.userRepository = userRepository;
         this.findingRepository = findingRepository;
+        this.projectRepository = projectRepository;
         this.passwordEncoder = passwordEncoder;
     }
 }
