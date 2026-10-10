@@ -64,3 +64,20 @@ button { cursor: pointer; }
 .landing-section { background: transparent; }.feature-card, .steps-grid > div, .auth-split-card, .auth-form-side, .auth-card { background: #17233b; border-color: #2d4264; color: #f8fafc; }.feature-card p, .steps-grid p, .auth-divider, .auth-mobile-link, .auth-copy, .auth-link { color: #a8b6cf; }.feature-icon { background: #243354; color: var(--neon-blue); }.code-snippet { background: #080d1d; }.landing-cta { color: #fff; }.landing-footer { border-color: #263653; }.landing-cta a, .outline-button { color: var(--neon-purple); }
 .auth-topbar .landing-brand { color: #f8fafc; }.home-button { color: #fff !important; }.auth-form-side h1 { color: var(--neon-blue); }.social-row button, .auth-form-side input { background: #0f172a; border-color: #385176; color: #f8fafc; }.auth-form-side input::placeholder { color: #7f91ad; }.forgot-link { color: #a8b6cf; }
 .scan-app { background: #ede9fe; color: #0f172a; }.scan-sidebar { background: #0f172a; }.scan-nav a.selected, .scan-item.active, .scan-item:hover { background: #263653; }.scan-search { background: #17233b; }.scan-header, .quality-banner, .metric-card, .report-card { background: #f8fbff; border-color: #d2deed; }.scan-header { color: #0f172a; }.metric-card strong, .quality-banner h2, .report-card h2 { color: #0f172a; }.score-ring { background: conic-gradient(#7c3aed 0 78%, #dbe4f0 78%); }.fake-chart polyline { stroke: #7c3aed; }.fake-chart path { fill: #a78bfa; }.passed-pill, .grade-row b { background: #16a34a; }.grade-row .grade-b { background: #f59e0b; }
+
+
+/* Accessible, distinct brand and feature icon accents */
+.landing-brand .brand-shield,
+.landing-footer .brand-shield,
+.sidebar .brand-shield {
+  color: #22d3ee;
+  filter: drop-shadow(0 0 8px #22d3ee55);
+}
+.feature-icon { transition: transform .2s ease, box-shadow .2s ease; }
+.feature-card:hover .feature-icon { transform: translateY(-2px); }
+.feature-icon-rose { color: #fb7185; background: #fb71851c; box-shadow: inset 0 0 0 1px #fb71853d; }
+.feature-icon-amber { color: #fbbf24; background: #fbbf241c; box-shadow: inset 0 0 0 1px #fbbf243d; }
+.feature-icon-cyan { color: #22d3ee; background: #22d3ee1c; box-shadow: inset 0 0 0 1px #22d3ee3d; }
+.feature-icon-violet { color: #c4b5fd; background: #a78bfa1f; box-shadow: inset 0 0 0 1px #a78bfa45; }
+.feature-icon-green { color: #4ade80; background: #4ade801c; box-shadow: inset 0 0 0 1px #4ade803d; }
+.feature-icon-blue { color: #60a5fa; background: #60a5fa1c; box-shadow: inset 0 0 0 1px #60a5fa3d; }
