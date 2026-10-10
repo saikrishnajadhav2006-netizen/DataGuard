@@ -1,0 +1,35 @@
+warning: in the working copy of 'frontend/src/components/NewReviewModal.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/index.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/main.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/pages/Dashboard.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/pages/Landing.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/pages/Login.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/tailwind.config.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/vite.config.js', LF will be replaced by CRLF the next time Git touches it
+ .env.example                                |  33 [32m+[m[31m-[m
+ .gitignore                                  |   3 [32m+[m[31m-[m
+ frontend/src/App.css                        |  66 [31m----[m
+ frontend/src/App.jsx                        |  11 [32m+[m[31m-[m
+ frontend/src/components/DashboardLayout.jsx |  42 [31m---[m
+ frontend/src/components/FindingList.jsx     |  24 [31m--[m
+ frontend/src/components/NewReviewModal.jsx  |  29 [32m+[m[31m-[m
+ frontend/src/components/RecentReviews.jsx   |  19 [31m--[m
+ frontend/src/components/StatCard.jsx        |   8 [31m-[m
+ frontend/src/design-v4.css                  |  27 [31m--[m
+ frontend/src/index.css                      |  30 [32m+[m[31m-[m
+ frontend/src/landing-interactions.css       |   2 [31m-[m
+ frontend/src/lib/api.js                     |  25 [32m+[m[31m-[m
+ frontend/src/main.jsx                       |  10 [32m+[m[31m-[m
+ frontend/src/metro.css                      |  11 [31m-[m
+ frontend/src/pages/Dashboard.jsx            | 456 [32m++++++++++++++++++++++++++[m[31m--[m
+ frontend/src/pages/History.jsx              |   6 [31m-[m
+ frontend/src/pages/Landing.jsx              |  98 [32m++[m[31m----[m
+ frontend/src/pages/Login.jsx                |  47 [32m++[m[31m-[m
+ frontend/src/pages/Projects.jsx             |   6 [31m-[m
+ frontend/src/pages/Register.jsx             |  21 [31m--[m
+ frontend/src/reference-motion.css           |   3 [31m-[m
+ frontend/src/robot-motion.css               |  16 [31m-[m
+ frontend/src/theme.css                      |  29 [31m--[m
+ frontend/tailwind.config.js                 |  22 [32m+[m[31m-[m
+ frontend/vite.config.js                     |   9 [32m+[m
+ 26 files changed, 578 insertions(+), 475 deletions(-)

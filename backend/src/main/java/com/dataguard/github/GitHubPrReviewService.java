@@ -248,7 +248,11 @@ public class GitHubPrReviewService {
                 ann.put("end_line", line);
                 ann.put("annotation_level", ghLevel);
                 ann.put("title", finding.getTitle() != null ? finding.getTitle() : "Issue");
-                ann.put("message", finding.getDescription() != null ? finding.getDescription() : "DataGuard found an issue");
+                String message = finding.getDescription() != null ? finding.getDescription() : "DataGuard found an issue";
+                if (finding.getRecommendation() != null && !finding.getRecommendation().isBlank()) {
+                    message += " Recommendation: " + finding.getRecommendation();
+                }
+                ann.put("message", message);
                 
                 annotations.add(ann);
             }

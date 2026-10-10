@@ -5,5 +5,12 @@ public record FixResponse(
         String description,
         String originalCode,
         String suggestedCode,
-        boolean safeToApply) {
+        boolean safeToApply,
+        String patch,
+        String filePath,
+        Integer lineNumber,
+        String repository,
+        String branch,
+        String commitSha,
+        String reason) {
 }

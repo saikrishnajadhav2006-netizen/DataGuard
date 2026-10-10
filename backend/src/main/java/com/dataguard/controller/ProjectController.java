@@ -1,6 +1,6 @@
 package com.dataguard.controller;
 
-import com.dataguard.dto.FixResponse;
+import com.dataguard.dto.FixApprovalRequest;
 import com.dataguard.dto.ReviewResponse;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Review;
@@ -10,6 +10,10 @@ import com.dataguard.repository.FindingRepository;
 import com.dataguard.repository.ReviewRepository;
 import com.dataguard.repository.UserRepository;
 import com.dataguard.service.ProjectService;
+import com.dataguard.service.FixSuggestionService;
+import com.dataguard.service.ReviewEngine;
+import com.dataguard.service.ZipProjectArchiveService;
+import com.dataguard.dto.FixedProjectResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,19 +41,28 @@ public class ProjectController {
     private final FindingRepository findingRepository;
     private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FixSuggestionService fixSuggestionService;
+    private final ZipProjectArchiveService zipProjectArchiveService;
+    private final ReviewEngine reviewEngine;
 
     public ProjectController(
             ProjectService projectService,
             UserRepository userRepository,
             FindingRepository findingRepository,
             ReviewRepository reviewRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            FixSuggestionService fixSuggestionService,
+            ZipProjectArchiveService zipProjectArchiveService,
+            ReviewEngine reviewEngine) {
 
         this.projectService = projectService;
         this.userRepository = userRepository;
         this.findingRepository = findingRepository;
         this.reviewRepository = reviewRepository;
         this.passwordEncoder = passwordEncoder;
+        this.fixSuggestionService = fixSuggestionService;
+        this.zipProjectArchiveService = zipProjectArchiveService;
+        this.reviewEngine = reviewEngine;
     }
 
     // =========================================================
@@ -78,6 +91,9 @@ public class ProjectController {
 
             Review review =
                     projectService.processProjectUpload(file, user, name);
+            if (!"FAILED".equals(review.getStatus())) {
+                zipProjectArchiveService.retainOriginal(review.getId(), file.getBytes());
+            }
 
             List<Finding> findings =
                     findingRepository.findByReviewId(review.getId());
@@ -226,13 +242,119 @@ public class ProjectController {
                                 );
                     }
 
-                    return ResponseEntity.ok(
-                            buildFixResponse(finding)
-                    );
+                    try {
+                        return ResponseEntity.ok(fixSuggestionService.suggest(finding));
+                    } catch (IllegalArgumentException e) {
+                        return ResponseEntity.badRequest().body(e.getMessage());
+                    }
                 })
                 .orElseGet(
                         () -> ResponseEntity.notFound().build()
                 );
+    }
+
+    @PostMapping("/projects/reviews/{reviewId}/findings/{findingId}/fix/apply")
+    public ResponseEntity<?> applyFix(
+            @PathVariable Long reviewId,
+            @PathVariable Long findingId,
+            @RequestBody FixApprovalRequest approval,
+            Authentication authentication) {
+        User user = resolveUser(authentication);
+        Finding finding = findingRepository.findById(findingId).orElse(null);
+        if (finding == null || finding.getReview() == null || !reviewId.equals(finding.getReview().getId())) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!finding.getReview().getProject().getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).body("You do not have access to this finding.");
+        }
+        try {
+            return ResponseEntity.ok(fixSuggestionService.apply(finding, approval));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        } catch (Exception e) {
+            log.warn("Approved fix could not be confirmed for finding {}: {}", findingId, e.getClass().getSimpleName());
+            return ResponseEntity.status(502).body("GitHub could not confirm the fix pull request. Check the branch before retrying.");
+        }
+    }
+
+    @PostMapping("/reviews/{reviewId}/fixed-project/findings/{findingId}/approve")
+    public ResponseEntity<?> approveZipFix(@PathVariable Long reviewId, @PathVariable Long findingId,
+                                            Authentication authentication) {
+        User user = resolveUser(authentication);
+        Review review = ownedReview(reviewId, user);
+        if (review == null) return ResponseEntity.notFound().build();
+        Finding finding = findingRepository.findById(findingId).orElse(null);
+        if (finding == null || finding.getReview() == null || !reviewId.equals(finding.getReview().getId())) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            var proposal = fixSuggestionService.suggest(finding);
+            return ResponseEntity.ok(zipProjectArchiveService.approveFix(review, finding, proposal,
+                    findingRepository.findByReviewId(reviewId).size()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        } catch (IOException e) {
+            log.warn("Fixed project archive could not be prepared for review {}", reviewId, e);
+            return ResponseEntity.internalServerError().body("The fixed archive could not be safely prepared.");
+        }
+    }
+
+    @GetMapping("/reviews/{reviewId}/fixed-project")
+    public ResponseEntity<?> fixedProjectStatus(@PathVariable Long reviewId, Authentication authentication) {
+        User user = resolveUser(authentication);
+        Review review = ownedReview(reviewId, user);
+        if (review == null) return ResponseEntity.notFound().build();
+        return zipProjectArchiveService.status(review, findingRepository.findByReviewId(reviewId))
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/reviews/{reviewId}/fixed-project/re-review")
+    public ResponseEntity<?> reReviewFixedProject(@PathVariable Long reviewId, Authentication authentication) {
+        User user = resolveUser(authentication);
+        Review review = ownedReview(reviewId, user);
+        if (review == null) return ResponseEntity.notFound().build();
+        try {
+            var tree = zipProjectArchiveService.extractFixedProjectTree(review);
+            Review updated = reviewEngine.reRunReview(review, tree.toFile());
+            List<Finding> findings = findingRepository.findByReviewId(updated.getId());
+            return ResponseEntity.ok(ReviewResponse.from(updated, findings));
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.status(409).body("Build a verified fixed project ZIP before re-running analysis.");
+        } catch (IOException e) {
+            log.warn("Re-review failed for review {}", reviewId, e);
+            return ResponseEntity.internalServerError().body("The fixed project could not be re-analyzed safely.");
+        }
+    }
+
+    @GetMapping("/reviews/{reviewId}/fixed-project/download")
+    public ResponseEntity<?> downloadFixedProject(@PathVariable Long reviewId, Authentication authentication) {
+        User user = resolveUser(authentication);
+        Review review = ownedReview(reviewId, user);
+        if (review == null) return ResponseEntity.notFound().build();
+        try {
+            var archive = zipProjectArchiveService.openVerified(review);
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"project-fixed.zip\"")
+                    .contentType(org.springframework.http.MediaType.parseMediaType("application/zip"))
+                    .contentLength(archive.length())
+                    .body(new org.springframework.core.io.FileSystemResource(archive));
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("The fixed archive failed verification. Please approve the fix again.");
+        }
+    }
+
+    private Review ownedReview(Long reviewId, User user) {
+        return reviewRepository.findById(reviewId)
+                .filter(r -> r.getProject() != null && r.getProject().getUser() != null
+                        && user.getId().equals(r.getProject().getUser().getId()))
+                .orElse(null);
     }
 
     // =========================================================
@@ -282,85 +404,4 @@ public class ProjectController {
         return userRepository.save(user);
     }
 
-    // =========================================================
-    // Fix suggestion helper
-    // =========================================================
-
-    private FixResponse buildFixResponse(Finding finding) {
-
-        String suggestedCode;
-        String description;
-
-        String title =
-                finding.getTitle() != null
-                        ? finding.getTitle().toLowerCase()
-                        : "";
-
-        // -----------------------------------------------------
-        // Debug output
-        // -----------------------------------------------------
-
-        if (title.contains("debug output")) {
-
-            suggestedCode =
-                    "private static final Logger log =\n"
-                    + "    LoggerFactory.getLogger(CurrentClass.class);\n\n"
-                    + "log.info(\"Replace with structured logging\");";
-
-            description =
-                    "Replace standard output with structured SLF4J "
-                    + "logging and add the logger declaration to the class.";
-
-        // -----------------------------------------------------
-        // Empty catch
-        // -----------------------------------------------------
-
-        } else if (title.contains("empty catch")) {
-
-            suggestedCode =
-                    "catch (Exception exception) {\n"
-                    + "    log.error(\"Operation failed\", exception);\n"
-                    + "}";
-
-            description =
-                    "Handle the exception explicitly by logging it "
-                    + "or returning a controlled error response.";
-
-        // -----------------------------------------------------
-        // Hardcoded credentials
-        // -----------------------------------------------------
-
-        } else if (title.contains("hardcoded")) {
-
-            suggestedCode =
-                    "// Use environment variables or a secrets manager:\n"
-                    + "String secret = System.getenv(\"MY_SECRET\");";
-
-            description =
-                    "Move the hardcoded credential to an environment "
-                    + "variable or a secrets management system.";
-
-        // -----------------------------------------------------
-        // Generic recommendation
-        // -----------------------------------------------------
-
-        } else {
-
-            suggestedCode =
-                    finding.getRecommendation() != null
-                            ? finding.getRecommendation()
-                            : "";
-
-            description =
-                    "Review the recommendation and apply manually.";
-        }
-
-        return new FixResponse(
-                finding.getId(),
-                description,
-                finding.getEvidence(),
-                suggestedCode,
-                false
-        );
-    }
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final com.dataguard.service.TokenRevocationService tokenRevocationService;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -42,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (userEmail != null && !tokenRevocationService.isRevoked(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
             if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
@@ -55,8 +56,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    public JwtAuthenticationFilter(JwtService jwtService, @Lazy UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, com.dataguard.service.TokenRevocationService tokenRevocationService, @Lazy UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
+        this.tokenRevocationService = tokenRevocationService;
         this.userDetailsService = userDetailsService;
     }
 }

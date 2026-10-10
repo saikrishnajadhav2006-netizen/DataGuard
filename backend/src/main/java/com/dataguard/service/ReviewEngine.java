@@ -6,6 +6,7 @@ import com.dataguard.analyzer.CodeQualityAnalyzer;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Project;
 import com.dataguard.entity.Review;
+import com.dataguard.repository.AIExplanationRepository;
 import com.dataguard.repository.FindingRepository;
 import com.dataguard.repository.ReviewRepository;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class ReviewEngine {
 
     private final ReviewRepository reviewRepository;
     private final FindingRepository findingRepository;
+    private final AIExplanationRepository aiExplanationRepository;
     private final CodeQualityAnalyzer codeQualityAnalyzer;
     private final com.dataguard.analyzer.PMDAnalyzer pmdAnalyzer;
     private final com.dataguard.analyzer.DependencyCheckAnalyzer dependencyCheckAnalyzer;
@@ -58,6 +60,7 @@ public class ReviewEngine {
     public ReviewEngine(
             ReviewRepository reviewRepository,
             FindingRepository findingRepository,
+            AIExplanationRepository aiExplanationRepository,
             CodeQualityAnalyzer codeQualityAnalyzer,
             com.dataguard.analyzer.PMDAnalyzer pmdAnalyzer, com.dataguard.analyzer.DependencyCheckAnalyzer dependencyCheckAnalyzer,
             ArchitectureAnalyzer architectureAnalyzer,
@@ -66,6 +69,7 @@ public class ReviewEngine {
 
         this.reviewRepository = reviewRepository;
         this.findingRepository = findingRepository;
+        this.aiExplanationRepository = aiExplanationRepository;
         this.codeQualityAnalyzer = codeQualityAnalyzer;
         this.pmdAnalyzer = pmdAnalyzer;
         this.dependencyCheckAnalyzer = dependencyCheckAnalyzer;
@@ -210,6 +214,61 @@ public class ReviewEngine {
         }
 
         return review;
+    }
+
+    /**
+     * Re-runs analyzers on an existing review (for example after approved ZIP fixes).
+     * Previous findings for this review are replaced; the review id and project stay the same.
+     */
+    public Review reRunReview(Review review, File extractedDir) {
+        if (review == null || review.getId() == null || review.getProject() == null) {
+            throw new IllegalArgumentException("Review and project are required for re-analysis.");
+        }
+        final Review currentReview = reviewRepository.findById(review.getId()).orElseThrow();
+        Project project = currentReview.getProject();
+        aiExplanationRepository.deleteByFinding_Review_Id(currentReview.getId());
+        findingRepository.deleteByReviewId(currentReview.getId());
+        currentReview.setStatus("RUNNING");
+        currentReview.setCompletedAt(null);
+        reviewRepository.save(currentReview);
+
+        List<Finding> allFindings = new ArrayList<>();
+        List<String> failedAnalyzers = new ArrayList<>();
+        try {
+            log.info("Re-running review #{} for project '{}'", currentReview.getId(), project.getName());
+            allFindings.addAll(runAnalyzer("CodeQuality",
+                    () -> codeQualityAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers));
+            allFindings.addAll(runAnalyzer("PMD",
+                    () -> pmdAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers));
+            allFindings.addAll(runAnalyzer("Dependency Check",
+                    () -> dependencyCheckAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers));
+            allFindings.addAll(runAnalyzer("Architecture",
+                    () -> architectureAnalyzer.analyze(extractedDir, currentReview), failedAnalyzers));
+
+            if (!allFindings.isEmpty()) {
+                findingRepository.saveAll(allFindings);
+            }
+            scoringService.applyScores(currentReview, allFindings);
+            currentReview.setAnalysisWarnings(failedAnalyzers);
+            currentReview.setStatus(failedAnalyzers.isEmpty() ? "COMPLETED" : "INCOMPLETE");
+            currentReview.setCompletedAt(LocalDateTime.now());
+            reviewRepository.save(currentReview);
+        } catch (Exception e) {
+            log.error("Re-review #{} failed: {}", currentReview.getId(), e.getMessage(), e);
+            currentReview.setStatus("FAILED");
+            reviewRepository.save(currentReview);
+        } finally {
+            deleteDirectory(extractedDir);
+        }
+
+        if (!allFindings.isEmpty()) {
+            try {
+                aiService.generateExplanations(allFindings);
+            } catch (Exception e) {
+                log.warn("AI explanation generation failed during re-review (non-fatal): {}", e.getMessage());
+            }
+        }
+        return currentReview;
     }
 
     /**

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface FindingRepository extends JpaRepository<Finding, Long> {
     List<Finding> findByReviewId(Long reviewId);
+
+    void deleteByReviewId(Long reviewId);
 }

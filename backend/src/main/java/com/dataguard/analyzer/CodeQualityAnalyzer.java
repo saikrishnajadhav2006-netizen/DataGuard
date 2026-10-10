@@ -44,6 +44,9 @@ public class CodeQualityAnalyzer {
     );
 
     private static final Pattern DYNAMIC_EVALUATION = Pattern.compile("\\beval\\s*\\(");
+    private static final Pattern SQL_STATEMENT = Pattern.compile("(?i)\\b(select|insert|update|delete)\\b.*\\b(where|values|set)\\b");
+    private static final Pattern USER_INPUT_NAME = Pattern.compile(
+            "(?i)\\b(username|user_name|user_id|email|input|request_data|request_args|form_data|params)\\b");
 
     public List<Finding> analyze(File projectDir, Review review) {
         List<Finding> findings = new ArrayList<>();
@@ -147,6 +150,25 @@ public class CodeQualityAnalyzer {
                         "CODE_QUALITY", "LOW",
                         relativePath, lineNum, trimmed,
                         "Use the Python logging module instead of print() for application output."));
+            }
+
+            // Rule 8: SQL text concatenated with a likely user-controlled value.
+            // This is a heuristic warning only; it does not execute the query or
+            // treat arbitrary string concatenation as an injection vulnerability.
+            if (isPython && !trimmed.startsWith("#") && trimmed.contains("+")
+                    && SQL_STATEMENT.matcher(trimmed).find()
+                    && USER_INPUT_NAME.matcher(trimmed).find()) {
+                Finding sqlFinding = createFinding(review, "sec-python-sql-concat",
+                        "Potential SQL injection from string concatenation",
+                        "SECURITY", "HIGH", relativePath, lineNum, line,
+                        "The SQL statement is concatenated with a value named like user input. "
+                                + "If this query is executed, input may change its structure. Use a parameterized query "
+                                + "and pass the value separately (for example, cursor.execute(sql, (username,))); "
+                                + "choose the placeholder syntax required by your database driver.");
+                sqlFinding.setDescription("The SQL statement is concatenated with a value named like user input. "
+                        + "If this query is executed, input may change its structure. This is a potential issue, "
+                        + "not proof of exploitability.");
+                findings.add(sqlFinding);
             }
 
             // Rule 5: TODO / FIXME / HACK comments

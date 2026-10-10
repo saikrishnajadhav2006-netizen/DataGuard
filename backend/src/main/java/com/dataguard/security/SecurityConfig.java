@@ -67,7 +67,9 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
+            .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((request, response, error) -> response.sendError(401)))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/logout").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/github/webhook").permitAll()   // verified via HMAC, not JWT
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/github/status").permitAll()

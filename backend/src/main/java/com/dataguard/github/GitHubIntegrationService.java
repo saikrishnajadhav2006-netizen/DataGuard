@@ -171,6 +171,7 @@ public class GitHubIntegrationService {
             }
         }
         log.warn("PR #{} for {}/{} reached GitHub's 3,000-file API limit; source list may be incomplete.", number, owner, repo);
+        allFiles.add(Map.of("_dataguard_truncated", true));
         return allFiles;
     }
 
@@ -209,6 +210,7 @@ public class GitHubIntegrationService {
         String encodedPath = org.springframework.web.util.UriUtils.encodePath(path, java.nio.charset.StandardCharsets.UTF_8);
         String url = String.format("%s/repos/%s/%s/contents/%s?ref=%s", GITHUB_API_URL, owner, repo, encodedPath, ref);
         
+        try {
         return Boolean.TRUE.equals(restTemplate.execute(url, HttpMethod.GET, request -> {
             request.getHeaders().set("Authorization", "token " + installationToken);
             request.getHeaders().set("Accept", "application/vnd.github.v3.raw");
@@ -238,6 +240,10 @@ public class GitHubIntegrationService {
                 return true;
             }
         }));
+        } catch (Exception e) {
+            log.warn("Could not download changed file {} from {}/{} ({}).", path, owner, repo, e.getClass().getSimpleName());
+            return false;
+        }
     }
 
     public byte[] downloadFileContent(String owner, String repo, String path, String ref, String installationToken) {
@@ -256,10 +262,91 @@ public class GitHubIntegrationService {
         return null;
     }
 
+    public String getBranchHeadSha(String owner, String repo, String branch, String installationToken) {
+        String encodedBranch = org.springframework.web.util.UriUtils.encodePathSegment(branch, java.nio.charset.StandardCharsets.UTF_8);
+        String url = String.format("%s/repos/%s/%s/branches/%s", GITHUB_API_URL, owner, repo, encodedBranch);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET,
+                    new HttpEntity<>(createInstallationTokenHeaders(installationToken)), Map.class);
+            Map body = response.getBody();
+            Map commit = body == null ? null : (Map) body.get("commit");
+            return commit == null ? null : (String) commit.get("sha");
+        } catch (HttpClientErrorException e) {
+            log.warn("Could not verify branch {}/{}:{} ({}).", owner, repo, branch, e.getStatusCode());
+            return null;
+        }
+    }
+
+    public String getFileSha(String owner, String repo, String path, String ref, String installationToken) {
+        String encodedPath = org.springframework.web.util.UriUtils.encodePath(path, java.nio.charset.StandardCharsets.UTF_8);
+        String encodedRef = org.springframework.web.util.UriUtils.encodeQueryParam(ref, java.nio.charset.StandardCharsets.UTF_8);
+        String url = String.format("%s/repos/%s/%s/contents/%s?ref=%s", GITHUB_API_URL, owner, repo, encodedPath, encodedRef);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET,
+                    new HttpEntity<>(createInstallationTokenHeaders(installationToken)), Map.class);
+            return response.getBody() == null ? null : (String) response.getBody().get("sha");
+        } catch (HttpClientErrorException e) {
+            log.warn("Could not retrieve file metadata for {}/{}:{} ({}).", owner, repo, path, e.getStatusCode());
+            return null;
+        }
+    }
+
+    public boolean createBranch(String owner, String repo, String branch, String fromSha, String installationToken) {
+        String url = String.format("%s/repos/%s/%s/git/refs", GITHUB_API_URL, owner, repo);
+        Map<String, Object> body = Map.of("ref", "refs/heads/" + branch, "sha", fromSha);
+        try {
+            restTemplate.exchange(url, HttpMethod.POST,
+                    new HttpEntity<>(body, createInstallationTokenHeaders(installationToken)), Map.class);
+            return true;
+        } catch (HttpClientErrorException e) {
+            log.warn("Could not create fix branch for {}/{} ({}).", owner, repo, e.getStatusCode());
+            return false;
+        }
+    }
+
+    public boolean updateFileOnBranch(String owner, String repo, String path, String message, String contentBase64,
+                                      String branch, String fileSha, String installationToken) {
+        String encodedPath = org.springframework.web.util.UriUtils.encodePath(path, java.nio.charset.StandardCharsets.UTF_8);
+        String url = String.format("%s/repos/%s/%s/contents/%s", GITHUB_API_URL, owner, repo, encodedPath);
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("message", message);
+        body.put("content", contentBase64);
+        body.put("branch", branch);
+        body.put("sha", fileSha);
+        try {
+            restTemplate.exchange(url, HttpMethod.PUT,
+                    new HttpEntity<>(body, createInstallationTokenHeaders(installationToken)), Map.class);
+            return true;
+        } catch (HttpClientErrorException e) {
+            log.warn("Could not write approved fix to branch {}/{}:{} ({}).", owner, repo, branch, e.getStatusCode());
+            return false;
+        }
+    }
+
+    public Map<String, Object> createPullRequest(String owner, String repo, String title, String bodyText,
+                                                  String headBranch, String baseBranch, String installationToken) {
+        String url = String.format("%s/repos/%s/%s/pulls", GITHUB_API_URL, owner, repo);
+        Map<String, Object> body = Map.of("title", title, "body", bodyText, "head", headBranch, "base", baseBranch);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST,
+                    new HttpEntity<>(body, createInstallationTokenHeaders(installationToken)), Map.class);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            log.warn("Could not open approved fix PR for {}/{} ({}).", owner, repo, e.getStatusCode());
+            return null;
+        }
+    }
+
     /**
      * Creates a check run.
      */
     public Map<String, Object> createCheckRun(String owner, String repo, String headSha, String name, String status, String conclusion, Map<String, Object> output, String installationToken) {
+        return createCheckRun(owner, repo, headSha, name, status, conclusion, output, null, null, installationToken);
+    }
+
+    public Map<String, Object> createCheckRun(String owner, String repo, String headSha, String name, String status,
+                                               String conclusion, Map<String, Object> output, String externalId,
+                                               List<Map<String, Object>> actions, String installationToken) {
         if (installationToken == null) return null;
         String url = String.format("%s/repos/%s/%s/check-runs", GITHUB_API_URL, owner, repo);
         HttpHeaders headers = createInstallationTokenHeaders(installationToken);
@@ -270,6 +357,8 @@ public class GitHubIntegrationService {
         if (status != null) body.put("status", status);
         if (conclusion != null) body.put("conclusion", conclusion);
         if (output != null) body.put("output", output);
+        if (externalId != null) body.put("external_id", externalId);
+        if (actions != null && !actions.isEmpty()) body.put("actions", actions);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -285,6 +374,12 @@ public class GitHubIntegrationService {
      * Updates a check run.
      */
     public Map<String, Object> updateCheckRun(String owner, String repo, Long checkRunId, String status, String conclusion, Map<String, Object> output, String installationToken) {
+        return updateCheckRun(owner, repo, checkRunId, status, conclusion, output, null, installationToken);
+    }
+
+    public Map<String, Object> updateCheckRun(String owner, String repo, Long checkRunId, String status,
+                                               String conclusion, Map<String, Object> output,
+                                               List<Map<String, Object>> actions, String installationToken) {
         if (installationToken == null) return null;
         String url = String.format("%s/repos/%s/%s/check-runs/%d", GITHUB_API_URL, owner, repo, checkRunId);
         HttpHeaders headers = createInstallationTokenHeaders(installationToken);
@@ -293,6 +388,7 @@ public class GitHubIntegrationService {
         if (status != null) body.put("status", status);
         if (conclusion != null) body.put("conclusion", conclusion);
         if (output != null) body.put("output", output);
+        if (actions != null) body.put("actions", actions);
 
         try {
             // PATCH doesn't work directly with RestTemplate in some configurations, but we can try HttpMethod.PATCH

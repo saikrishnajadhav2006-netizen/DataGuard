@@ -1,4 +1,6 @@
 package com.dataguard.github;
+import com.dataguard.repository.AIExplanationRepository;
+import com.dataguard.service.RadarChatProvider;
 
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Project;
@@ -90,7 +92,7 @@ public class GitHubPrReviewServiceTest {
         public Review reviewToReturn;
         public ReviewEngine delegate;
         public boolean runReviewCalled = false;
-        public TestReviewEngine() { super(null, null, null, null, null, null, null, null); }
+        public TestReviewEngine() { super(null, null, null, null, null, null, null, null, null); }
         @Override
         public Review runReview(Project project, File extractedDir) {
             runReviewCalled = true;
@@ -177,6 +179,7 @@ public class GitHubPrReviewServiceTest {
             return saved;
         }
         @Override public List<Finding> findByReviewId(Long reviewId) { return findingsToReturn; }
+        @Override public void deleteByReviewId(Long reviewId) {}
         @Override public void flush() {}
         @Override public <S extends Finding> S saveAndFlush(S entity) { return null; }
         @Override public <S extends Finding> List<S> saveAllAndFlush(Iterable<S> entities) { return null; }
@@ -293,35 +296,87 @@ public class GitHubPrReviewServiceTest {
     }
 
     @Test
-    void vulnerablePrSourceFlowsThroughReviewEngineIntoCheckRunScoresAndAnnotations() {
-        githubService.files = List.of(Map.of("filename", "src/app.py", "status", "added"));
-        githubService.downloadContent = "payload = eval(input())\n";
+void vulnerablePrSourceFlowsThroughReviewEngineIntoCheckRunScoresAndAnnotations() {
+    githubService.files = List.of(
+            Map.of("filename", "src/app.py", "status", "added")
+    );
 
-        ReviewRepository reviewRepository = mock(ReviewRepository.class);
-        when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> {
-            Review saved = invocation.getArgument(0);
-            if (saved.getId() == null) saved.setId(7L);
-            return saved;
-        });
-        ReviewEngine realEngine = new ReviewEngine(reviewRepository, findingRepository,
-                new CodeQualityAnalyzer(), new PMDAnalyzer(), new DependencyCheckAnalyzer(),
-                new ArchitectureAnalyzer(), new ScoringService(),
-                new AIService(new org.springframework.beans.factory.support.StaticListableBeanFactory()
-                        .getBeanProvider(org.springframework.ai.chat.client.ChatClient.class), null));
-        reviewEngine.delegate = realEngine;
+    githubService.downloadContent = "import sqlite3\n"
+            + "def find_user(username):\n"
+            + "    cursor.execute(\"SELECT * FROM users WHERE username = '"
+            + "\" + username + \"'\")\n";
 
-        prReviewService.processPullRequest("owner", "repo", 1, "sha123");
+    ReviewRepository reviewRepository = mock(ReviewRepository.class);
 
-        assertEquals(1, findingRepository.findingsToReturn.size());
-        assertEquals("SECURITY", findingRepository.findingsToReturn.get(0).getCategory());
-        String summary = (String) githubService.updatedCheckRunOutput.get("summary");
-        assertTrue(summary.contains("**Overall** | 96/100"));
-        assertTrue(summary.contains("**Security** | 90/100"));
-        assertTrue(summary.contains("**Quality** | 100/100"));
-        List<Map<String, Object>> annotations = (List<Map<String, Object>>) githubService.updatedCheckRunOutput.get("annotations");
-        assertEquals(1, annotations.size());
-        assertEquals("src/app.py", annotations.get(0).get("path"));
-    }
+    when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> {
+        Review saved = invocation.getArgument(0);
+
+        if (saved.getId() == null) {
+            saved.setId(7L);
+        }
+
+        return saved;
+    });
+
+    AIExplanationRepository explanationRepository =
+            mock(AIExplanationRepository.class);
+
+    RadarChatProvider testProvider = turns ->
+            "Explanation: Test response\n"
+                    + "Impact: Test impact\n"
+                    + "Recommended action: Use a parameterized query.";
+
+    AIService aiService = new AIService(
+            testProvider,
+            explanationRepository
+    );
+
+    ReviewEngine realEngine = new ReviewEngine(
+            reviewRepository,
+            findingRepository,
+            explanationRepository,
+            new CodeQualityAnalyzer(),
+            new PMDAnalyzer(),
+            new DependencyCheckAnalyzer(),
+            new ArchitectureAnalyzer(),
+            new ScoringService(),
+            aiService
+    );
+
+    reviewEngine.delegate = realEngine;
+
+    prReviewService.processPullRequest("owner", "repo", 1, "sha123");
+
+    assertEquals(1, findingRepository.findingsToReturn.size());
+    assertEquals(
+            "SECURITY",
+            findingRepository.findingsToReturn.get(0).getCategory()
+    );
+    assertEquals(
+            "sec-python-sql-concat",
+            findingRepository.findingsToReturn.get(0).getRuleId()
+    );
+
+    String summary =
+            (String) githubService.updatedCheckRunOutput.get("summary");
+
+    assertTrue(summary.contains("**Overall** | 96/100"));
+    assertTrue(summary.contains("**Security** | 90/100"));
+    assertTrue(summary.contains("**Quality** | 100/100"));
+
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> annotations =
+            (List<Map<String, Object>>) githubService.updatedCheckRunOutput
+                    .get("annotations");
+
+    assertEquals(1, annotations.size());
+    assertEquals("src/app.py", annotations.get(0).get("path"));
+    assertEquals(3, annotations.get(0).get("start_line"));
+    assertTrue(
+            ((String) annotations.get(0).get("message"))
+                    .contains("parameterized query")
+    );
+}
 
     @Test
     void testCreateCheckRunOutput_AllScoresAndAnnotationsMapped() throws Exception {

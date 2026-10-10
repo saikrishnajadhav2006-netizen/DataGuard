@@ -10,19 +10,29 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class JwtService {
 
-    @Value("${JWT_SECRET:8a4b6c8d2e4f6g8h0j2k4l6m8n0p2q4r6s8t0u2v4w6x8y0z8a4b6c8d2e4f6g8h}")
+    @Value("${JWT_SECRET:}")
     private String secretKey;
 
     @Value("${dataguard.security.jwt.expiration:86400000}")
     private long jwtExpiration;
 
+    @PostConstruct
+    void validateConfiguration() {
+        if (secretKey == null || secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT_SECRET must contain at least 32 bytes.");
+        }
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    public Date extractExpiration(String token) { return extractClaim(token, Claims::getExpiration); }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -47,10 +57,6 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -60,6 +66,6 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 }

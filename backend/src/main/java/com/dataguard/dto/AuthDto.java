@@ -1,9 +1,15 @@
 package com.dataguard.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class AuthDto {
     
     public static class LoginRequest {
+        @NotBlank @Email @Size(max = 254)
         private String email;
+        @NotBlank @Size(max = 200)
         private String password;
         
         public LoginRequest() {}
@@ -14,8 +20,11 @@ public class AuthDto {
     }
 
     public static class RegisterRequest {
+        @NotBlank @Size(max = 120)
         private String fullName;
+        @NotBlank @Email @Size(max = 254)
         private String email;
+        @NotBlank @Size(min = 10, max = 200)
         private String password;
         
         public RegisterRequest() {}

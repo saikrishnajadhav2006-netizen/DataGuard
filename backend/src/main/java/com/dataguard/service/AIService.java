@@ -1,13 +1,12 @@
 package com.dataguard.service;
 
-import com.dataguard.entity.Finding;
 import com.dataguard.entity.AIExplanation;
+import com.dataguard.entity.Finding;
 import com.dataguard.repository.AIExplanationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -15,43 +14,72 @@ public class AIService {
 
     private static final Logger log = LoggerFactory.getLogger(AIService.class);
 
-    private final ChatClient chatClient;
+    private final RadarChatProvider provider;
     private final AIExplanationRepository aiExplanationRepository;
 
-    public AIService(ObjectProvider<ChatClient> chatClientProvider, AIExplanationRepository aiExplanationRepository) {
-        this.chatClient = chatClientProvider.getIfAvailable();
+    public AIService(
+            RadarChatProvider provider,
+            AIExplanationRepository aiExplanationRepository) {
+        this.provider = provider;
         this.aiExplanationRepository = aiExplanationRepository;
     }
 
     public void generateExplanations(List<Finding> findings) {
-        if (chatClient == null) {
+        if (findings == null || findings.isEmpty()) {
             return;
         }
 
         for (Finding finding : findings) {
-            String prompt = String.format(
-                "You are an expert AI code reviewer. Analyze the following finding:\\n" +
-                "Title: %s\\n" +
-                "Severity: %s\\n" +
-                "Evidence: %s\\n" +
-                "Provide a short JSON response with keys: 'explanation', 'impact', 'recommendedAction'.",
-                finding.getTitle(), finding.getSeverity(), finding.getEvidence()
-            );
-
             try {
-                // Correct syntax for Spring AI 1.0.0-M1
-                String response = chatClient.prompt(new org.springframework.ai.chat.prompt.Prompt(prompt)).call().content();
-                
+                String prompt = """
+                        You are DataGuard AI, an expert code reviewer.
+                        Explain this code-review finding using only the supplied evidence.
+                        Do not invent details or claim that code has been modified.
+                        Return a concise response with these sections:
+                        Explanation:
+                        Impact:
+                        Recommended action:
+
+                        Finding title: %s
+                        Severity: %s
+                        Evidence: %s
+                        Existing recommendation: %s
+                        """.formatted(
+                        safe(finding.getTitle()),
+                        safe(finding.getSeverity()),
+                        safe(finding.getEvidence()),
+                        safe(finding.getRecommendation()));
+
+                String response = provider.complete(List.of(
+                        new RadarChatProvider.Turn(
+                                "system",
+                                "You provide accurate, concise code-review explanations."),
+                        new RadarChatProvider.Turn("user", prompt)));
+
+                if (response == null || response.isBlank()) {
+                    log.warn("Groq returned an empty explanation for finding {}", finding.getId());
+                    continue;
+                }
+
                 AIExplanation explanation = new AIExplanation();
                 explanation.setFinding(finding);
-                explanation.setExplanation("AI Analysis: " + response); 
-                explanation.setImpact("Determined by AI context");
-                explanation.setRecommendedAction(finding.getRecommendation() + " - AI Confirmed");
-                
+                explanation.setExplanation(response);
+                explanation.setImpact("See AI-generated explanation.");
+                explanation.setRecommendedAction(
+                        safe(finding.getRecommendation()));
+
                 aiExplanationRepository.save(explanation);
+
             } catch (Exception e) {
-                log.warn("AI Provider unavailable or error: {}", e.getMessage());
+                log.warn(
+                        "Could not generate AI explanation for finding {}: {}",
+                        finding.getId(),
+                        e.getMessage());
             }
         }
+    }
+
+    private String safe(String value) {
+        return value == null || value.isBlank() ? "Not provided" : value;
     }
 }
