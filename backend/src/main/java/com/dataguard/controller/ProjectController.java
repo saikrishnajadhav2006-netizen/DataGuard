@@ -80,7 +80,7 @@ public class ProjectController {
     }
 
     private ResponseEntity<?> createFixResponse(Finding finding, Authentication authentication) {
-        if (!finding.getReview().getProject().getUser().getEmail().equals(authentication.getName())) {
+        if (!finding.getReview().getProject().getUser().getEmail().equals(authenticationEmail(authentication))) {
             return ResponseEntity.status(403).body("You do not have access to this finding.");
         }
 

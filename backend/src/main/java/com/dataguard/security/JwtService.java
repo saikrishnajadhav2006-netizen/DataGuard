@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${JWT_SECRET:8a4b6c8d2e4f6g8h0j2k4l6m8n0p2q4r6s8t0u2v4w6x8y0z8a4b6c8d2e4f6g8h}")
+    @Value("${JWT_SECRET:}")
     private String secretKey;
 
     @Value("${dataguard.security.jwt.expiration:86400000}")
@@ -60,6 +60,13 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET must be configured before issuing or validating tokens.");
+        }
+        byte[] keyBytes = secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT_SECRET must contain at least 32 UTF-8 bytes for HS256.");
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

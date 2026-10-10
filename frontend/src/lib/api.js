@@ -12,7 +12,12 @@ async function request(path, options = {}) {
 
   const contentType = response.headers.get('content-type') || '';
   const body = contentType.includes('application/json') ? await response.json() : await response.text();
-  if (!response.ok) throw new Error(typeof body === 'string' ? body : 'Request failed');
+  if (!response.ok) {
+    const message = typeof body === 'string'
+      ? body
+      : body?.message || body?.error || body?.detail || 'Request failed';
+    throw new Error(message);
+  }
   return body;
 }
 
