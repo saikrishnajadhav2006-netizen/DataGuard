@@ -18,7 +18,7 @@ DataGuard AI uses a modern, monolithic architecture:
 - **Frontend**: React + Vite + Tailwind CSS
 - **Backend**: Java 21 + Spring Boot 3.x
 - **Database**: Supabase PostgreSQL (or H2 for local dev)
-- **AI Integration**: Groq Chat Completions API (optional; deterministic review works without a key)
+- **AI Integration**: Spring AI (Compatible with OpenAI, Gemini, etc.)
 - **Security**: JWT-based Authentication
 
 ## Project Structure
@@ -53,7 +53,7 @@ mvn spring-boot:run
 ```
 *(If Maven is not installed locally, you can generate a maven wrapper `mvn wrapper:wrapper` first).*
 
-The API runs on `http://localhost:8080`. If startup reports that port 8080 is already in use on Windows, run `netstat -ano | findstr :8080`, identify the PID with `tasklist /FI "PID eq <PID>"`, and stop only the old DataGuard process; alternatively launch with `mvn spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"`.
+The API runs on `http://localhost:8080`.
 
 ### 3. Running the Frontend (React)
 
@@ -79,18 +79,9 @@ For Supabase Auth, also set `SUPABASE_URL`, `SUPABASE_AUTH_ENABLED=true`, `VITE_
 
 Do not commit `.env` or place database passwords, JWT secrets, or AI keys in source files. Uploaded ZIPs are currently extracted temporarily; use Supabase Storage before retaining archives or generated patches in production.
 
-### 5. Groq AI setup
+### 5. AI API setup
 
-The backend uses Groq's Chat Completions API through Spring's `RestClient`; it does not require Spring AI or an OpenAI key. Set these values in the root `.env` file:
-
-```dotenv
-GROQ_BASE_URL=https://api.groq.com/openai/v1
-GROQ_API_KEY=your-groq-api-key
-GROQ_MODEL=llama-3.3-70b-versatile
-JWT_SECRET=replace-with-a-random-secret-of-at-least-32-bytes
-```
-
-If `GROQ_API_KEY` is empty, the deterministic review still runs and AI explanations are skipped. Never commit real keys or secrets.
+The application uses Spring AI's OpenAI-compatible integration for optional explanations. Set `AI_API_KEY` and `AI_MODEL=gpt-4o-mini`, then clear `SPRING_AUTOCONFIGURE_EXCLUDE` in the deployment environment. Without a key, deterministic findings and fix previews still work.
 
 ### 6. Run Semgrep locally
 
@@ -120,7 +111,7 @@ The current review path is intentionally hybrid:
 4. The deterministic analyzer scans Java source and returns severity, file, line, evidence, and recommendations.
 5. Findings and the quality score are persisted with the review.
 6. The dashboard displays the findings and can request a safe fix preview.
-7. Groq is optional and can explain findings when `GROQ_API_KEY` is configured.
+7. Spring AI/OpenAI is optional and can explain findings when an API key is configured.
 
 The fix action currently returns a reviewable patch suggestion. It does not overwrite uploaded source automatically. This prevents an AI suggestion from silently changing a repository.
 
@@ -132,9 +123,9 @@ Use deterministic tools for evidence and an LLM for explanation, not the other w
 - JavaScript/TypeScript: ESLint and the TypeScript compiler
 - Security: Semgrep or CodeQL
 - Parsing: Tree-sitter for language-aware file and function chunks
-- Explanations: optional Groq Chat Completions; fix previews remain reviewable suggestions
+- Explanation and fix previews: Spring AI with OpenAI or another compatible provider
 
-The current project includes the first deterministic Java rules and an optional Groq explanation provider. Semgrep, CodeQL, Tree-sitter, and language-specific runners should be added as isolated worker processes before enabling them in production.
+The current project includes the first deterministic Java rules and the Spring AI integration point. Semgrep, CodeQL, Tree-sitter, and language-specific runners should be added as isolated worker processes before enabling them in production.
 
 ## Supabase Data Model
 
