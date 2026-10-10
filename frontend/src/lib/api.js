@@ -25,6 +25,15 @@ export function authenticate(path, payload) {
   return request(path, { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export function getReviews() {
+  let auth = {};
+  try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* malformed session */ }
+  if (!auth.token) throw new Error('Your session has expired. Please sign in again.');
+  return request('/api/projects/reviews', {
+    headers: { Authorization: `Bearer ${auth.token}` },
+  });
+}
+
 export function uploadProject(name, file, token) {
   const formData = new FormData();
   formData.append('name', name);
