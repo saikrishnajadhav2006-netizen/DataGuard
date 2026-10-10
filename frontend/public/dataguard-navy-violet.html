@@ -697,7 +697,187 @@ run();
    const r=latestReview, findings=Array.isArray(r.findings)?r.findings:[];
    if(format==='json')return downloadBlob(new Blob([JSON.stringify({projectName:r.projectName,reviewId:r.id,reviewDate:r.reviewDate,qualityScore:r.qualityScore,fileCount:reviewFiles.length||r.fileCount||r.totalFiles||null,findings,appliedFixes:0},null,2)],{type:'application/json'}),reviewName(r)+'-report.json');
    const rows=findings.map(f=>'<tr><td>'+escHtml(f.severity)+'</td><td>'+escHtml(f.title)+'</td><td>'+escHtml(f.filePath)+'</td><td>'+escHtml(f.lineNumber)+'</td><td>'+escHtml(f.evidence||f.recommendation)+'</td></tr>').join('');
-   const doc='<!doctype html><html><head><meta charset="utf-8"><title>DataGuard Review Report</title><style>body{font:15px Arial;max-width:1100px;margin:36px auto;padding:0 20px;color:#18213c}h1{color:#705cf5}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f0edff}</style></head><body><h1>DataGuard AI — Code Review</h1><p><b>Project:</b> '+escHtml(r.projectName)+'</p><p><b>Score:</b> '+escHtml(r.qualityScore)+'/100 &nbsp; <b>Findings:</b> '+findings.length+' &nbsp; <b>Applied fixes:</b> 0</p><p><b>Review date:</b> '+escHtml(r.reviewDate||'')+'</p><table><thead><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Evidence / recommendation</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>';
+   const doc='<!doctype html><html><head><meta charset="utf-8"><title>DataGuard Review Report</title><style>body{font:15px Arial;max-width:1100px;margin:36px auto;padding:0 20px;color:#18213c}h1{color:#705cf5}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f0edff}</style></head><body><h1>DataGuard AI — Code Review</h1><p><b>Project:</b> '+escHtml(r.projectName)+'</p><p><b>Score:</b> '+escHtml(r.qualityScore)+'/100 &nbsp; <b>Findings:</b> '+findings.length+' &nbsp; <b>Applied fixes:</b> 0</p><p><b>Review date:</b> '+escHtml(r.reviewDate||'')+'</p><table><thead><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Evidence / recommendation</th></tr></thead><tbody>'+rows+'</tbody></table>
+/* Final UX corrections: prevent brand navigation, derive downloads from current input,
+   reset all sample values, and render exactly nine AI Radar tool cards in 3 columns. */
+<style id="dg-final-ux-css">
+.dg-radar-results{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.dg-tool{display:flex;flex-direction:column;min-height:230px;background:linear-gradient(145deg,rgba(125,103,255,.12),var(--card));border:1px solid color-mix(in srgb,var(--a) 28%,var(--bd));backdrop-filter:blur(16px)}
+.dg-tool .dg-tool-head{align-items:center}.dg-tool .dg-tool-actions{margin-top:auto;padding-top:12px}
+.dg-tool .dg-preview{height:104px;border-radius:12px;background:radial-gradient(circle at 50% 35%,rgba(130,104,255,.32),rgba(130,104,255,.04));display:grid;place-items:center;font-size:38px;margin-bottom:12px;border:1px solid var(--bd)}
+.dg-tool .dg-details{font-size:13px;line-height:1.55;color:var(--mu);margin-top:10px;white-space:pre-wrap}
+.dg-tool .dg-details[hidden]{display:none}
+.dg-report-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.dg-report-bar button{border:1px solid var(--bd);border-radius:10px;padding:8px 12px;background:var(--card);color:var(--ink);cursor:pointer}
+@media(max-width:1000px){.dg-radar-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.dg-radar-results{grid-template-columns:1fr}}
+</style>
+<script id="dg-final-ux-js">
+(function(){
+const $=s=>document.querySelector(s), $=s=>Array.from(document.querySelectorAll(s));
+const apiBase=(window.DATAGUARD_API_URL||'').replace(/\/$/,'');
+const session=()=>{try{return JSON.parse(localStorage.getItem('dataguard-auth')||'{}')}catch(_){return {}}};
+const token=()=>session().token||'';
+let selectedFiles=[], currentReview=null, radarResults=[], lastPrompt='', activeFilter='Any price', activeDomain='';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function msg(text){const n=$('#stt');if(n)n.textContent=text}
+function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
+function cleanName(s){return String(s||'dataguard-project').replace(/[^a-z0-9._-]/gi,'-')}
+function updateStats(r){
+ const fs=Array.isArray(r?.findings)?r.findings:[];
+ const score=Number(r?.qualityScore??0);
+ const nums=$('.bh .ms b');
+ if(nums[0])nums[0].textContent=String(selectedFiles.length||r?.fileCount||0);
+ if(nums[1])nums[1].textContent=String(fs.length);
+ if(nums[2])nums[2].textContent='0';
+ $('.bh .tt h3').forEach(n=>n.textContent=fs.length?'Review completed':'Quality gate passed');
+ $('.ring b').forEach(n=>n.textContent=String(score));
+ $('.ring').forEach(n=>n.style.setProperty('--p',score));
+ const count=$('#cnt');if(count)count.textContent='0 of '+fs.length+' applied';
+ const sub=$('#fsub');if(sub)sub.textContent=fs.length+' findings from saved review';
+ const fixed=$('#fxd');if(fixed)fixed.textContent='0';
+}
+function showReportControls(){
+ const old=$('#dg-review-actions');if(old)old.remove();
+ const bar=document.createElement('div');bar.className='dg-report-bar';bar.id='dg-review-actions';
+ const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;bar.append(b)};
+ add('Download report',()=>downloadReport('html'));
+ if(selectedFiles.length===1)add('Download file',()=>saveBlob(selectedFiles[0],selectedFiles[0].name));
+ if(selectedFiles.length>1)add('Download selected files (ZIP)',async()=>{try{await zipLib();const z=new JSZip();selectedFiles.forEach(f=>z.file(f.webkitRelativePath||f.name,f));saveBlob(await z.generateAsync({type:'blob'}),'dataguard-files.zip')}catch(e){alert(e.message)}});
+ add('Download reviewed ZIP',downloadReviewedZip);
+ const zone=$('#dg-upload-zone');if(zone)zone.after(bar);
+}
+function downloadReport(format){
+ if(!currentReview)return alert('Upload and review a project first.');
+ const r=currentReview,fs=Array.isArray(r.findings)?r.findings:[];
+ if(format==='json'){saveBlob(new Blob([JSON.stringify({projectName:r.projectName,qualityScore:r.qualityScore,reviewDate:r.reviewDate,fileCount:selectedFiles.length,findings:fs,appliedFixes:0},null,2)],{type:'application/json'}),cleanName(r.projectName)+'-report.json');return}
+ const body=fs.map(f=>'<tr><td>'+esc(f.severity)+'</td><td>'+esc(f.title)+'</td><td>'+esc(f.filePath)+'</td><td>'+esc(f.lineNumber)+'</td><td>'+esc(f.evidence||f.recommendation)+'</td></tr>').join('');
+ saveBlob(new Blob(['<!doctype html><meta charset="utf-8"><title>DataGuard report</title><style>body{font:15px Arial;max-width:1000px;margin:30px auto;color:#202443}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#eeeaff}</style><h1>DataGuard AI review report</h1><p>Project: '+esc(r.projectName)+' · Score: '+esc(r.qualityScore)+'/100 · Findings: '+fs.length+' · Applied fixes: 0</p><table><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Details</th></tr>'+body+'</table>'],{type:'text/html'}),cleanName(r.projectName)+'-report.html')
+}
+async function zipLib(){if(window.JSZip)return;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=ok;s.onerror=()=>no(new Error('ZIP helper could not load. Check your internet connection.'));document.head.append(s)})}
+async function downloadReviewedZip(){
+ if(!currentReview?.id)return alert('No saved review selected.');
+ try{const r=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(currentReview.id)+'/download',{headers:{Authorization:'Bearer '+token()}});if(!r.ok)throw new Error(await r.text()||'Download failed.');saveBlob(await r.blob(),cleanName(currentReview.projectName)+'-reviewed.zip')}catch(e){alert('Download failed: '+e.message)}
+}
+async function upload(files){
+ files=Array.from(files||[]);if(!files.length)return;
+ if(files.reduce((a,f)=>a+f.size,0)>25*1024*1024)return alert('Total upload size must be 25 MB or less.');
+ if(!token()){window.pending='check';if(window.go)window.go('auth');return}
+ selectedFiles=files;msg('Preparing upload…');
+ try{
+  let zip,name;
+  if(files.length===1&&/\.zip$/i.test(files[0].name)){zip=files[0];name=files[0].name}
+  else{await zipLib();const z=new JSZip();files.forEach(f=>z.file(f.webkitRelativePath||f.name,f));zip=await z.generateAsync({type:'blob',compression:'DEFLATE'});name=(files.length===1?files[0].name.replace(/\.[^.]+$/,''):'dataguard-project')+'.zip'}
+  const form=new FormData();form.append('name',name.replace(/\.zip$/i,''));form.append('file',zip,name);
+  msg('Uploading and reviewing…');
+  const res=await fetch(apiBase+'/api/projects/upload',{method:'POST',headers:{Authorization:'Bearer '+token()},body:form});
+  const r=await res.json().catch(()=>({}));if(!res.ok)throw new Error(r.message||r.error||'Review failed ('+res.status+').');
+  currentReview=r;updateStats(r);
+  if(!Array.isArray(r.findings)||!r.findings.length){if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">No findings were returned. No fixes are available.</div>';if($('#msgs'))$('#msgs').innerHTML='';}
+  showReportControls();msg('Review complete · '+(r.findings||[]).length+' findings');
+  if(window.loadHistory)window.loadHistory();
+ }catch(e){msg('Upload failed');alert('Upload/review failed: '+e.message)}
+}
+function wireUpload(){
+ const zone=$('#dg-upload-zone');if(!zone)return;
+ const fi=$('#dg-files-input'),zi=$('#dg-zip-input');
+ if(fi)fi.onchange=e=>{upload(e.target.files);e.target.value=''};
+ if(zi)zi.onchange=e=>{upload(e.target.files);e.target.value=''};
+ const pf=$('#dg-pick-files');if(pf)pf.onclick=()=>fi.click();
+ const pz=$('#dg-pick-zip');if(pz)pz.onclick=()=>zi.click();
+ zone.ondragover=e=>{e.preventDefault();zone.classList.add('drag')};
+ zone.ondragleave=()=>zone.classList.remove('drag');
+ zone.ondrop=e=>{e.preventDefault();zone.classList.remove('drag');upload(e.dataTransfer.files)};
+ // Brand/logo should not navigate to Home when the user is inside code review.
+ const brand=$('.side .brand');if(brand)brand.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(window.go)window.go('check');const app=$('#app');if(app)app.dataset.v='check'},true);
+ const newScan=$('#nw');if(newScan)newScan.onclick=e=>{e.preventDefault();zi.click()};
+}
+function resetDemoState(){
+ $('.bh .ms b').forEach(n=>n.textContent='0');$('.ring b').forEach(n=>n.textContent='0');$('.ring').forEach(n=>n.style.setProperty('--p',0));
+ $('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');
+ if($('#fsub'))$('#fsub').textContent='Upload a project to begin';if($('#cnt'))$('#cnt').textContent='0 of 0 applied';if($('#fxd'))$('#fxd').textContent='0';
+ if($('#msgs'))$('#msgs').innerHTML='';if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a project to see findings and suggested fixes.</div>';
+ const old=$('#dg-review-actions');if(old)old.remove();
+ const originalRun=window.run;window.run=()=>$('#dg-zip-input')?.click();
+}
+function normalize(t){
+ return {name:String(t.name||t.tool||t.title||'AI tool').replace(/\*\*/g,''),description:String(t.description||t.use||t.primaryUse||t.strengths||'Description not provided.').replace(/\*\*/g,''),price:String(t.price||t.pricing||t.cost||'Pricing not verified'),free:typeof t.free==='boolean'?t.free:/free|open.source|open-source/i.test(String(t.price||t.pricing||'')),url:String(t.url||t.website||t.link||''),category:String(t.category||activeDomain||'General'),icon:String(t.icon||'✦')};
+}
+function parseTools(text){
+ const raw=String(text||'').trim().replace(/^\s*```json/i,'').replace(/```\s*$/,'').trim();
+ try{const o=JSON.parse(raw);const a=Array.isArray(o)?o:o.tools||o.results||o.items;if(Array.isArray(a))return a.map(normalize)}catch(_){}
+ // Never show raw paragraphs/tables as the result UI. If the provider doesn't return JSON,
+ // salvage only distinct named tool rows and show a retryable error if parsing fails.
+ const seen=new Set(),a=[];
+ raw.split(/\n+/).forEach(line=>{const m=line.trim().replace(/^\|/,'').replace(/\|$/,'').match(/^\s*(?:\d+[.)]\s*)?\*{0,2}([^|—–:]{2,55}?)\*{0,2}\s*(?:\||[—–:]\s+)(.{8,})/);if(!m)return;const name=m[1].replace(/\*\*/g,'').trim();if(!name||/^(tool|name|---|:?-+)/i.test(name)||seen.has(name.toLowerCase()))return;seen.add(name.toLowerCase());a.push(normalize({name,description:m[2].split('|')[0].replace(/\*\*/g,'').trim()}))});
+ return a;
+}
+function domain(){
+ const selected=$('#cats button.on, #cats .on').map(n=>n.textContent.trim()).filter(Boolean);
+ return selected.length?selected[0]:'';
+}
+function priceFilter(){
+ const b=$('.opts .ch[data-g="b"].on')[0];return b?b.textContent.trim():'Any price';
+}
+function renderCards(items){
+ const out=$('#out');if(!out)return;
+ const budget=priceFilter();
+ let list=items.filter(t=>{if(/free only/i.test(budget))return t.free;if(/under \$20/i.test(budget))return t.free||/free|\$\s?(?:[0-9]|1[0-9])(?:\.\d+)?\s*(?:\/|per month|monthly)/i.test(t.price);return true});
+ list=list.slice(0,9);
+ if(!list.length){out.innerHTML='<div class="dg-empty">No tools matched this filter. Try Any price or refine your request.</div>';return}
+ const grid=document.createElement('div');grid.className='dg-radar-results';
+ list.forEach(t=>{
+  const card=document.createElement('article');card.className='dg-tool';
+  const preview=document.createElement('div');preview.className='dg-preview';preview.textContent=t.icon;
+  const head=document.createElement('div');head.className='dg-tool-head';
+  const titleWrap=document.createElement('div');titleWrap.style.minWidth='0';
+  const title=document.createElement('h4');title.textContent=t.name;
+  const price=document.createElement('div');price.className='dg-price';price.textContent=t.price;
+  titleWrap.append(title,price);head.append(titleWrap);
+  const tags=document.createElement('div');tags.className='dg-tags';
+  [t.free?'Free plan':'Paid / freemium',t.category].filter(Boolean).forEach(v=>{const tag=document.createElement('span');tag.className='dg-tag';tag.textContent=v;tags.append(tag)});
+  const details=document.createElement('div');details.className='dg-details';details.hidden=true;details.textContent=t.description;
+  const actions=document.createElement('div');actions.className='dg-tool-actions';
+  const view=document.createElement('button');view.textContent='View details';view.onclick=()=>{details.hidden=!details.hidden;view.textContent=details.hidden?'View details':'Minimize details'};
+  const maximize=document.createElement('button');maximize.textContent='Maximize';maximize.onclick=()=>{card.classList.toggle('dg-expanded');const expanded=card.classList.contains('dg-expanded');details.hidden=!expanded;card.style.gridColumn=expanded?'1 / -1':'';maximize.textContent=expanded?'Minimize':'Maximize'};
+  actions.append(view,maximize);
+  if(/^https?:\/\//i.test(t.url)){const a=document.createElement('a');a.href=t.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Visit tool';actions.append(a)}
+  card.append(preview,head,tags,details,actions);grid.append(card);
+ });
+ out.innerHTML='<div class="dg-history-title">AI RADAR RESULTS · '+list.length+' tools</div>';out.append(grid);
+}
+function renderRadarHistory(){
+ const host=$('#hl');if(!host)return;
+ let sessions=[];try{sessions=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}
+ let sec=$('#dg-radar-history');if(sec)sec.remove();sec=document.createElement('div');sec.id='dg-radar-history';sec.innerHTML='<div class="dg-history-title">AI Radar history</div>';
+ sessions.slice(0,12).forEach(h=>{const b=document.createElement('button');b.type='button';b.className='dg-tool-action';b.style.display='block';b.style.width='100%';b.style.margin='5px 0';b.textContent=h.prompt||'Radar session';b.onclick=()=>{lastPrompt=h.prompt||'';radarResults=h.items||[];renderCards(radarResults)};sec.append(b)});host.append(sec);
+}
+async function radar(mode,prompt){
+ prompt=String(prompt||'').trim();if(!prompt)return $('#fq')?.focus();
+ if(!token()){window.pending='radar';if(window.go)window.go('auth');return}
+ activeDomain=domain();const budget=priceFilter();
+ const promptToApi='Recommend exactly 9 real tools for this request: '+prompt+'. Domain selected: '+(activeDomain||'No domain selected; recommend broadly useful tools across multiple domains')+'. Price filter: '+budget+'. Return ONLY valid JSON in this schema, no markdown or prose: {"tools":[{"name":"official tool name","description":"clear concise details","price":"known plan price or Free / Freemium / Paid; say pricing not verified if uncertain","free":true or false,"category":"category","icon":"one emoji","url":"official https URL"}]}. Include nine distinct tools. Free only means exclude paid-only products. Under $20/month means only free or tools with a known plan under $20/month. Do not invent prices. For domain-specific categories, every recommendation must fit that category.';
+ const out=$('#out');out.innerHTML='<div class="dg-empty">Finding nine tools and applying your selected filters…</div>';
+ try{
+  const res=await fetch(apiBase+'/api/ai/radar',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({prompt:promptToApi,mode:mode||'find',category:activeDomain||'general'})});
+  const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.message||body.error||'AI Radar request failed ('+res.status+').');
+  const items=parseTools(body.reply||body.response||body.message||'');
+  if(!items.length)throw new Error('AI returned unstructured text instead of tool data. Please retry; raw paragraphs are hidden to keep the results readable.');
+  radarResults=items;lastPrompt=prompt;renderCards(items);
+  let sessions=[];try{sessions=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}
+  sessions.unshift({id:Date.now(),prompt,mode,items,createdAt:new Date().toISOString()});localStorage.setItem('dg-radar-history',JSON.stringify(sessions.slice(0,20)));renderRadarHistory();
+ }catch(e){out.innerHTML='<div class="dg-empty">'+esc(e.message)+'</div>'}
+}
+function wireRadar(){
+ const ff=$('#ff'),fq=$('#fq');if(ff)ff.onclick=()=>radar('find',fq?.value||'');if(fq)fq.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();radar('find',fq.value)}};
+ const wf=$('#wf');if(wf)wf.onclick=()=>radar('workflow',$('#wq')?.value||fq?.value||'');
+ $('.pl2 button').forEach(b=>b.onclick=()=>radar('find',(fq?.value||'')+' '+b.dataset.x));
+ $('.opts .ch').forEach(b=>b.addEventListener('click',()=>{if(radarResults.length)renderCards(radarResults)}));
+}
+wireUpload();wireRadar();resetDemoState();renderRadarHistory();
+})();
+</script>
+</body></html>';
    downloadBlob(new Blob([doc],{type:'text/html;charset=utf-8'}),reviewName(r)+'-report.html');
  }
  async function makeZip(files){
