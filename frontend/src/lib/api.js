@@ -64,7 +64,7 @@ export function generateFix(reviewId, findingId) {
 export async function downloadReviewedProject(projectId, projectName) {
   let auth = {};
   try { auth = JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { /* expired or malformed session */ }
-  const response = await fetch(`${API_URL}/api/projects/${projectId}/download`, {
+  const response = await fetch(`${API_URL}/api/projects/reviews/${projectId}/download`, {
     headers: { Authorization: `Bearer ${auth.token || ''}` },
   });
   if (!response.ok) {
