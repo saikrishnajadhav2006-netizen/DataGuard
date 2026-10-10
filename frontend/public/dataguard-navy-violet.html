@@ -110,6 +110,7 @@ input,textarea{background:var(--card);border:1px solid var(--bd);border-radius:1
 .msgs{flex:1;overflow-y:auto;padding:20px 20px 8px;display:flex;flex-direction:column;gap:16px}
 .mb{display:flex;gap:12px;max-width:88%}.mb .ba{width:32px;height:32px;border-radius:50%;background:var(--ag);display:grid;place-items:center;color:var(--onb);flex:none}.mb .ba .i{width:18px;height:18px}
 .bub{background:var(--card);border:1px solid var(--bd);padding:12px 14px;border-radius:6px 20px 20px 20px;font-size:var(--cfs,14px);line-height:1.6}.mb.u{align-self:flex-end;flex-direction:row-reverse}.mb.u .bub{background:var(--ub,var(--ag));color:#fff;border:0;border-radius:20px 6px 20px 20px}
+.bub.md h1,.bub.md h2,.bub.md h3{font-size:1.05em;margin:0 0 8px}.bub.md p{margin:0 0 10px}.bub.md p:last-child{margin-bottom:0}.bub.md ul,.bub.md ol{margin:0 0 10px;padding-left:22px}.bub.md li{margin:3px 0}.bub.md pre{margin:8px 0 10px;padding:10px 12px;overflow:auto;border:1px solid var(--bd);border-radius:10px;background:#0004;font:12px/1.5 var(--mono);white-space:pre-wrap}.bub.md code{padding:2px 5px;border-radius:5px;background:#0003;font:12px var(--mono)}.bub.md pre code{padding:0;background:none}.bub.md a{color:var(--a2);text-decoration:underline}.bub.md .md-table{display:block;max-width:100%;overflow-x:auto;margin:10px 0 12px;border:1px solid var(--bd);border-radius:10px}.bub.md table{border-collapse:collapse;width:100%;min-width:420px;font-size:.92em}.bub.md th,.bub.md td{padding:8px 10px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}.bub.md th{background:#0003;font-weight:700}.bub.md tr:last-child td{border-bottom:0}
 .att{display:inline-flex;gap:6px;align-items:center;background:#ffffff26;border-radius:8px;padding:4px 10px;font:12px var(--mono);margin-top:6px}
 .ty i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mu);margin:0 2px;animation:pl 1s infinite}.ty i:nth-child(2){animation-delay:.15s}.ty i:nth-child(3){animation-delay:.3s}@keyframes pl{50%{transform:scale(1.5)}}
 .rc{display:flex;gap:14px;align-items:center;min-width:290px}.fb2{margin-top:8px;display:inline-flex;gap:6px;align-items:center;background:var(--ag);color:var(--onb);border:0;border-radius:12px;padding:7px 14px;font:800 13px 'Inter';cursor:pointer}
@@ -321,7 +322,13 @@ a.btn{display:inline-block;text-decoration:none}
 <div class="lab2">TEXT SIZE</div><div class="seg2" id="psize"><button data-v="13">Small</button><button data-v="14">Medium</button><button data-v="16">Large</button></div><div class="rowt"><span>Show message times</span><span class="tg2" id="pts"></span></div></div>
 <button class="btn" id="pmd" style="width:100%;margin-top:20px">Done</button></div></div>
 <script>
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),B=document.body,app=$('#app'),msgs=$('#msgs'),bar=$('#bar'),esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),B=document.body,app=$('#app'),msgs=$('#msgs'),bar=$('#bar'),esc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function inlineMarkdown(value){let text=esc(value);text=text.replace(/`([^`\n]+)`/g,'<code>$1</code>');text=text.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');text=text.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/__([^_\n]+)__/g,'<strong>$1</strong>');return text.replace(/(^|[^\w])\*([^*\n]+)\*(?!\w)/g,'$1<em>$2</em>').replace(/(^|[^\w])_([^_\n]+)_(?!\w)/g,'$1<em>$2</em>')}
+function tableCells(line){const value=line.trim().replace(/^\|/,'').replace(/\|$/,'');return value.split('|').map(cell=>cell.trim())}
+function isTableSeparator(line){const cells=tableCells(line);return cells.length>0&&cells.every(cell=>/^:?-{3,}:?$/.test(cell))}
+function renderTable(header,separator,rows){const alignments=tableCells(separator).map(cell=>cell.startsWith(':')&&cell.endsWith(':')?'center':cell.startsWith(':')?'left':cell.endsWith(':')?'right':'');const renderCell=(cell,index)=>{const align=alignments[index]?' style="text-align:'+alignments[index]+'"':'';return align};const head=tableCells(header).map((cell,index)=>'<th'+renderCell(cell,index)+'>'+inlineMarkdown(cell)+'</th>').join('');const body=rows.map(row=>{const cells=tableCells(row);return '<tr>'+tableCells(header).map((_,index)=>'<td'+renderCell(cells[index]||'',index)+'>'+inlineMarkdown(cells[index]||'')+'</td>').join('')+'</tr>'}).join('');return '<div class="md-table"><table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div>'}
+function renderChatMarkdown(value){const lines=String(value??'').replace(/\r\n?/g,'\n').split('\n'),output=[],paragraph=[];let inCode=false,code=[];const flush=()=>{if(paragraph.length){output.push('<p>'+paragraph.map(inlineMarkdown).join('<br>')+'</p>');paragraph.length=0}};for(let i=0;i<lines.length;i++){const line=lines[i];if(/^```/.test(line.trim())){if(inCode){output.push('<pre><code>'+esc(code.join('\n'))+'</code></pre>');code=[]}else flush();inCode=!inCode;continue}if(inCode){code.push(line);continue}if(line.includes('|')&&i+1<lines.length&&isTableSeparator(lines[i+1])){flush();const separator=lines[i+1],rows=[];i+=2;while(i<lines.length&&lines[i].includes('|')&&lines[i].trim()){rows.push(lines[i]);i++}output.push(renderTable(line,separator,rows));i--;continue}const heading=line.match(/^\s{0,3}(#{1,3})\s+(.+?)\s*#*\s*$/);if(heading){flush();const level=heading[1].length;output.push('<h'+level+'>'+inlineMarkdown(heading[2])+'</h'+level+'>');continue}const list=line.match(/^\s*(?:[-*]|\d+[.)])\s+(.+)/);if(list){flush();const tag=/^\s*\d/.test(line)?'ol':'ul';if(!output.length||!output[output.length-1].startsWith('<'+tag+'>'))output.push('<'+tag+'></'+tag+'>');output[output.length-1]=output[output.length-1].replace('</'+tag+'>','<li>'+inlineMarkdown(list[1])+'</li></'+tag+'>');continue}if(!line.trim()){flush();continue}paragraph.push(line)}if(inCode)output.push('<pre><code>'+esc(code.join('\n'))+'</code></pre>');flush();return output.join('')}
+window.renderChatMarkdown=renderChatMarkdown;
 function pb(){document.documentElement.style.setProperty('--pb',(bar?bar.offsetHeight:0)+'px')}pb();addEventListener('resize',pb);
 /* navigation */
 function show(v){$$('.view').forEach(e=>e.classList.toggle('on',e.id===v));$('#nav').style.display=v==='dash'?'none':'flex';scrollTo(0,0)}
@@ -444,6 +451,15 @@ run();
   const API_BASE = (window.DATAGUARD_API_URL || '').replace(/\/$/, '');
   const $id = (id) => document.getElementById(id);
   const token = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}').token || ''; } catch (_) { return ''; } };
+  let chatHistory = [], chatSessionId = null;
+  function restoreChat() {
+    if (!chatHistory.length) return;
+    chatHistory.forEach(turn => {
+      if (turn.role === 'user') addU(turn.content);
+      else addB('<div class="md">' + renderChatMarkdown(turn.content) + '</div>');
+    });
+  }
+  window.restoreChat = restoreChat;
   let activeReviewId = null;
   const session = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch (_) { return {}; } };
   async function api(path, options) {
@@ -456,6 +472,17 @@ run();
     const body = type.includes('application/json') ? await response.json() : await response.text();
     if (!response.ok) throw new Error(typeof body === 'string' ? (body || 'Request failed (' + response.status + ')') : body.message || body.error || 'Request failed (' + response.status + ')');
     return body;
+  }
+  async function loadChatHistory() {
+    if (!token()) return;
+    try {
+      const result = await api('/api/ai/chat/history');
+      chatSessionId = result.sessionId || null;
+      chatHistory = Array.isArray(result.messages) ? result.messages : [];
+      restoreChat();
+    } catch (error) {
+      console.error('Could not load AI conversation history:', error);
+    }
   }
   function showError(id, message) { const node = $id(id); if (node) { node.textContent = message || ''; node.style.color = message ? 'var(--bad)' : ''; } }
   function userFromAuth(auth) { return { n: auth.fullName || auth.name || auth.email, e: auth.email || '', l: 'email' }; }
@@ -593,8 +620,11 @@ run();
     $('#q').value = ''; addU(text);
     if (!token()) { addB('Please sign in to use the AI assistant.'); pending = 'check'; go('auth'); return; }
     try {
-      const result = await api('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message: text }) });
-      addB(esc(result.reply || result.response || result.message || 'The AI returned an empty response.'));
+      const result = await api('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message: text, sessionId: chatSessionId }) });
+      const reply = result.reply || result.response || result.message || 'The AI returned an empty response.';
+      chatSessionId = result.sessionId || chatSessionId;
+      chatHistory = [...chatHistory, { role: 'user', content: text }, { role: 'assistant', content: reply }].slice(-20);
+      addB('<div class="md">'+renderChatMarkdown(reply)+'</div>');
     } catch (error) { addB('<b>AI request failed</b><br>' + esc(error.message || 'Check the backend AI configuration.')); }
   };
   $('#sd').onclick = () => window.send();
@@ -629,6 +659,7 @@ run();
     if (typeof upd === 'function') upd();
   } else { loggedIn = false; user = null; }
   document.querySelectorAll('[data-pg="home"], .logo, .brand').forEach(el => { el.style.cursor = 'pointer'; el.addEventListener('click', () => window.go('home')); });
+  loadChatHistory();
   loadHistory();
 })();
 </script>
