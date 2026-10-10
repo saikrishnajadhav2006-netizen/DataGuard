@@ -132,7 +132,7 @@ Use deterministic tools for evidence and an LLM for explanation, not the other w
 - JavaScript/TypeScript: ESLint and the TypeScript compiler
 - Security: Semgrep or CodeQL
 - Parsing: Tree-sitter for language-aware file and function chunks
-- Explanation and fix previews: Spring AI with OpenAI or another compatible provider
+- Explanations: optional Groq Chat Completions; fix previews remain reviewable suggestions
 
 The current project includes the first deterministic Java rules and an optional Groq explanation provider. Semgrep, CodeQL, Tree-sitter, and language-specific runners should be added as isolated worker processes before enabling them in production.
 
