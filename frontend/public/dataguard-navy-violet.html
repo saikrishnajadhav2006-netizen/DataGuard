@@ -455,6 +455,8 @@ run();
   document.querySelectorAll('.fc.su [data-login]').forEach(b => b.onclick = () => submitAuth('register'));
   document.querySelectorAll('.fc.si [data-login]').forEach(b => b.onclick = () => submitAuth('login'));
   document.querySelectorAll('[data-out]').forEach(b => b.onclick = window.signOutUser);
+  if ($id('navReg')) $id('navReg').onclick = () => { $id('box').classList.add('act'); window.go('auth'); };
+  if ($id('navLog')) $id('navLog').onclick = () => { $id('box').classList.remove('act'); window.go('auth'); };
   const fileInput = document.createElement('input');
   fileInput.type = 'file'; fileInput.accept = '.zip,application/zip,application/x-zip-compressed'; fileInput.hidden = true; fileInput.id = 'dg-project-upload';
   document.body.appendChild(fileInput);
@@ -538,7 +540,7 @@ run();
     if (['check', 'radar'].includes(page)) { show('dash'); setDv(page); if (page === 'check' && token()) loadHistory(); }
     else show(page);
     document.querySelectorAll('.pg').forEach(b => b.classList.toggle('on', b.dataset.pg === page));
-    if (page === 'auth' && $id('box')) $id('box').classList.remove('act');
+    if (page === 'auth' && $id('box')) { /* preserve the user's Sign In / Sign Up selection */ }
   };
   const oldSend = window.send;
   window.send = async function (text) {
