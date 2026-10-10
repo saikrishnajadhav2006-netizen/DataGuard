@@ -290,7 +290,7 @@ function upd(){if($('#who'))$('#who').textContent=loggedIn?'🔒 Logged in (tap 
 function go(p){if(['check','radar'].includes(p)&&!loggedIn){pending=p;$('#lnote').hidden=false;$('#lnote').textContent=p==='radar'?'Please sign in to use AI Radar. We will take you there right after.':'Please sign in to upload and check your project.';p='auth'}else if(p==='home'){pending=null}else if(p==='auth'&&!pending){$('#lnote').hidden=true}
 if(['check','radar'].includes(p)){show('dash');setDv(p)}else show(p);$$('.pg').forEach(b=>b.classList.toggle('on',b.dataset.pg===p))}
 function setDv(v){app.dataset.v=v;$$('[data-dv]').forEach(a=>a.classList.toggle('on',a.dataset.dv===v));$$('.pg').forEach(b=>b.classList.toggle('on',b.dataset.pg===v));$('#rp').classList.remove('on')}
-$('[data-pg]').forEach(b=>b.onclick=()=>go(b.dataset.pg));
+document.querySelectorAll('[data-pg]').forEach(b=>b.onclick=()=>go(b.dataset.pg));
 $('#navLog').onclick=()=>{ $('#box').classList.remove('act'); go('auth'); };
 $('#navReg').onclick=()=>{ $('#box').classList.add('act'); go('auth'); };
 $$('[data-login]').forEach(b=>b.onclick=()=>finish('email'));$$('[data-prov]').forEach(b=>b.onclick=()=>signIn(b.dataset.prov,b));
