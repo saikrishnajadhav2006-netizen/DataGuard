@@ -98,3 +98,67 @@ button { cursor: pointer; }
   .auth-form-side input { border-radius: 14px; }
   .auth-topbar { padding-inline: 18px; }
 }
+
+/* Auth layout guardrails */
+.auth-form-side { min-width: 0; gap: 16px; }
+.auth-form-side h1 { margin: 0; line-height: 1.15; }
+.auth-divider { margin: 0; line-height: 1.5; }
+.auth-form-side form { gap: 14px; }
+.auth-form-side input { min-height: 50px; }
+.auth-submit { min-width: 132px; min-height: 48px; cursor: pointer; }
+.auth-submit:disabled { opacity: .65; cursor: wait; }
+.form-error { width: 100%; margin: 0; color: #fb7185; font-size: 14px; text-align: left; overflow-wrap: anywhere; }
+.auth-welcome-side { min-width: 0; }
+@media (max-width: 850px) {
+  .auth-split-card { width: min(100% - 28px, 540px); min-height: 0; margin: 22px auto; }
+  .auth-form-side { min-height: 0; padding: clamp(24px, 7vw, 42px); }
+  .auth-form-side form { width: 100%; }
+  .auth-form-side input { border-radius: 14px; }
+  .auth-topbar { padding-inline: 18px; }
+  .auth-welcome-side { display: none; }
+}
+
+/* Dashboard interactions and collapsed navigation */
+.scan-search { min-width: 0; }
+.scan-search-input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
+.scan-search-input::placeholder { color: #b9aec9; }
+.scan-nav a { text-decoration: none; cursor: pointer; }
+.scan-brand > span { white-space: nowrap; }
+.scan-brand button { cursor: pointer; }
+.scan-no-results { padding: 10px 12px; color: #b9aec9; font-size: 13px; }
+.scan-app.sidebar-collapsed .scan-sidebar { width: 82px; padding-inline: 10px; }
+.scan-app.sidebar-collapsed .scan-brand { justify-content: center; font-size: 0; padding-inline: 0; }
+.scan-app.sidebar-collapsed .scan-brand button,
+.scan-app.sidebar-collapsed .new-scan-button span,
+.scan-app.sidebar-collapsed .scan-search-input,
+.scan-app.sidebar-collapsed .scan-nav a span,
+.scan-app.sidebar-collapsed .scan-list,
+.scan-app.sidebar-collapsed .scan-user div { display: none; }
+.scan-app.sidebar-collapsed .new-scan-button,
+.scan-app.sidebar-collapsed .scan-nav a { justify-content: center; }
+.scan-app.sidebar-collapsed .scan-search { justify-content: center; padding-inline: 10px; }
+.scan-app.sidebar-collapsed .scan-user { justify-content: center; }
+.scan-app.sidebar-collapsed .scan-main { min-width: 0; }
+#overview, #reports, #findings { scroll-margin-top: 24px; }
+.history-result { align-items: center; }
+@media (max-width: 850px) {
+  .scan-app.sidebar-collapsed .scan-sidebar { width: 64px; }
+  .scan-app:not(.sidebar-collapsed) .scan-sidebar { width: 220px; }
+  .scan-app:not(.sidebar-collapsed) .scan-brand { font-size: 17px; }
+  .scan-app:not(.sidebar-collapsed) .scan-brand button { display: grid; }
+  .scan-app:not(.sidebar-collapsed) .new-scan-button span,
+  .scan-app:not(.sidebar-collapsed) .scan-search-input,
+  .scan-app:not(.sidebar-collapsed) .scan-nav a span,
+  .scan-app:not(.sidebar-collapsed) .scan-list,
+  .scan-app:not(.sidebar-collapsed) .scan-user div { display: initial; }
+  .scan-app:not(.sidebar-collapsed) .scan-search-input { display: block; }
+}
+
+/* Upload and authentication form usability */
+.auth-field { display: flex; flex-direction: column; gap: 7px; width: 100%; color: var(--muted, #69729b); font-size: 13px; font-weight: 600; }
+.auth-form-side form { width: 100%; }
+.auth-form-side .auth-field input { width: 100%; }
+.file-drop { cursor: pointer; outline: none; }
+.file-drop.dragging, .file-drop:focus-visible { border-color: #7c5cff; background: rgba(124, 92, 255, .09); box-shadow: 0 0 0 3px rgba(124, 92, 255, .15); }
+.file-drop small { overflow-wrap: anywhere; }
+.review-form .text-button { align-self: flex-start; }
