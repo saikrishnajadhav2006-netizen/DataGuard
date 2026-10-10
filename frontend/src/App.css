@@ -153,3 +153,12 @@ button { cursor: pointer; }
   .scan-app:not(.sidebar-collapsed) .scan-user div { display: initial; }
   .scan-app:not(.sidebar-collapsed) .scan-search-input { display: block; }
 }
+
+/* Upload and authentication form usability */
+.auth-field { display: flex; flex-direction: column; gap: 7px; width: 100%; color: var(--muted, #69729b); font-size: 13px; font-weight: 600; }
+.auth-form-side form { width: 100%; }
+.auth-form-side .auth-field input { width: 100%; }
+.file-drop { cursor: pointer; outline: none; }
+.file-drop.dragging, .file-drop:focus-visible { border-color: #7c5cff; background: rgba(124, 92, 255, .09); box-shadow: 0 0 0 3px rgba(124, 92, 255, .15); }
+.file-drop small { overflow-wrap: anywhere; }
+.review-form .text-button { align-self: flex-start; }
