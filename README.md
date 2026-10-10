@@ -67,6 +67,8 @@ npm run dev
 
 The frontend will run on `http://localhost:5173`.
 
+The normal app is the React frontend: `/` is the landing page, `/login` and `/register` use the Spring Boot API, and `/dashboard`, `/projects`, and `/history` require a saved login session. The standalone visual demo is kept separately at `/prototype` and its simulated sign-in/scans are not real authentication.
+
 ### 4. Aiven PostgreSQL setup
 
 1. Open your Aiven PostgreSQL service and copy its connection details.
@@ -74,7 +76,7 @@ The frontend will run on `http://localhost:5173`.
 3. Set a strong `JWT_SECRET` in the backend environment for Spring Boot JWT authentication.
 4. Start Spring Boot. Hibernate manages the current application tables using the configured JPA schema setting.
 
-The default authentication flow is Spring Boot JWT backed by the application's user table. An optional Supabase Auth integration remains in the code for deployments that deliberately configure `SUPABASE_URL`, `SUPABASE_AUTH_ENABLED=true`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`; these values are not needed for the Aiven + Spring Boot JWT setup.
+The default authentication flow is Spring Boot JWT backed by the application's user table. The frontend uses Spring Boot by default. Supabase Auth is an optional separate provider and only activates when `VITE_AUTH_PROVIDER=supabase` is explicitly set in the frontend environment as well as the required Supabase settings; these values are not needed for the Aiven + Spring Boot JWT setup.
 
 Do not commit `.env` or place database passwords, JWT secrets, or AI keys in source files. Uploaded ZIPs are currently extracted temporarily; use Supabase Storage before retaining archives or generated patches in production.
 
