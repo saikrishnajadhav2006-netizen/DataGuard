@@ -17,7 +17,7 @@ DataGuard AI uses a modern, monolithic architecture:
 
 - **Frontend**: React + Vite + Tailwind CSS
 - **Backend**: Java 21 + Spring Boot 3.x
-- **Database**: Supabase PostgreSQL (or H2 for local dev)
+- **Database**: Aiven PostgreSQL for persistent deployments (or H2 for local development)
 - **AI Integration**: Groq Chat Completions API (optional; deterministic review works without a key)
 - **Security**: JWT-based Authentication
 
@@ -41,7 +41,7 @@ Copy the `.env.example` file to `.env` in the root directory (or simply configur
 cp .env.example .env
 ```
 
-If you are using Supabase PostgreSQL, update the `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. For local testing, the application defaults to an in-memory **H2 database** so it runs out-of-the-box.
+If you are using Aiven PostgreSQL, set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` from your Aiven connection details. For local testing, the application defaults to an in-memory **H2 database** so it runs out-of-the-box.
 
 ### 2. Running the Backend (Spring Boot)
 
@@ -67,15 +67,14 @@ npm run dev
 
 The frontend will run on `http://localhost:5173`.
 
-### 4. Supabase setup
+### 4. Aiven PostgreSQL setup
 
-1. Create a Supabase project and open **Connect**.
-2. Copy the PostgreSQL connection values into environment variables. Use the pooler connection from Supabase if the direct database hostname is not reachable from your network.
-3. Set `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DRIVER=org.postgresql.Driver`, and `DB_PLATFORM=org.hibernate.dialect.PostgreSQLDialect`.
-4. Set a strong `JWT_SECRET` in the backend environment.
-5. Start Spring Boot. Hibernate creates the current `users`, `projects`, `reviews`, `findings`, and explanation tables through `ddl-auto=update`.
+1. Open your Aiven PostgreSQL service and copy its connection details.
+2. Set `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DRIVER=org.postgresql.Driver`, and `DB_PLATFORM=org.hibernate.dialect.PostgreSQLDialect` in the root `.env` file.
+3. Set a strong `JWT_SECRET` in the backend environment for Spring Boot JWT authentication.
+4. Start Spring Boot. Hibernate manages the current application tables using the configured JPA schema setting.
 
-For Supabase Auth, also set `SUPABASE_URL`, `SUPABASE_AUTH_ENABLED=true`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`. The browser uses only the Supabase anon key. Spring Security validates the resulting access token against the Supabase issuer, and the backend provisions a local profile row when the user uploads their first review.
+The default authentication flow is Spring Boot JWT backed by the application's user table. An optional Supabase Auth integration remains in the code for deployments that deliberately configure `SUPABASE_URL`, `SUPABASE_AUTH_ENABLED=true`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`; these values are not needed for the Aiven + Spring Boot JWT setup.
 
 Do not commit `.env` or place database passwords, JWT secrets, or AI keys in source files. Uploaded ZIPs are currently extracted temporarily; use Supabase Storage before retaining archives or generated patches in production.
 

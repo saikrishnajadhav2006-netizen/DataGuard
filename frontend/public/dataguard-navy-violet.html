@@ -153,6 +153,31 @@ a.btn{display:inline-block;text-decoration:none}
 .lab2{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--mu);margin:18px 0 8px}.sws{display:flex;gap:10px}.sws i{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent}.sws i.on{border-color:var(--ink)}
 .seg2{display:flex;gap:6px}.seg2 button{flex:1;border:1px solid var(--bd);background:var(--card);color:var(--ink);padding:9px;border-radius:12px;font:600 13px 'Inter';cursor:pointer}.seg2 button.on{background:var(--ag);color:var(--onb);border-color:transparent}
 .rowt{display:flex;align-items:center;justify-content:space-between;margin-top:18px;font-size:14px}.tg2{width:42px;height:24px;border-radius:99px;background:var(--bd);position:relative;cursor:pointer;transition:.2s}.tg2:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.tg2.on{background:var(--a)}.tg2.on:after{left:21px}
+
+/* Auth layout repair: keep one form visible in the right panel and avoid overlap. */
+.box .fc { left: 50%; width: 50%; padding: 34px clamp(20px, 3vw, 44px); gap: 14px; }
+.box .fc.si { opacity: 1; z-index: 3; transform: none; pointer-events: auto; }
+.box .fc.su { opacity: 0; z-index: 1; transform: translateX(16px); pointer-events: none; }
+.box.act .fc.si { opacity: 0; z-index: 1; transform: translateX(16px); pointer-events: none; }
+.box.act .fc.su { opacity: 1; z-index: 3; transform: none; pointer-events: auto; }
+.box .fc h2 { margin: 0 0 6px; line-height: 1.2; }
+.box .fc input { width: 100%; min-height: 48px; flex: none; }
+.box .fc .btn { min-width: 132px; min-height: 48px; margin-top: 4px; }
+.box .fc .mu { line-height: 1.45; text-align: center; }
+@media (max-width: 900px) {
+  .stage { min-height: 0; padding: 28px 16px; }
+  .box { height: auto; min-height: 0; padding: 18px 0; }
+  .box .fc, .box .fc.si, .box .fc.su {
+    position: relative; left: auto; width: 100%; padding: 24px;
+    transform: none !important; opacity: 1; pointer-events: auto;
+  }
+  .box .fc.si { display: flex; }
+  .box .fc.su { display: none; }
+  .box.act .fc.si { display: none; }
+  .box.act .fc.su { display: flex; }
+  .box .oc { display: none; }
+}
+
 </style>
 </head>
 <body data-pal="1" data-mode="dark">
@@ -195,8 +220,8 @@ a.btn{display:inline-block;text-decoration:none}
  
 <!-- AUTH -->
 <section class="view" id="auth"><div class="stage"><div class="lnote" id="lnote" hidden></div><div class="box" id="box">
-<div class="fc su"><h2>Create Account</h2><button class="sbtn" data-prov="google"><span class="gg">G</span>Sign up with Google</button><span class="mu">or use your email to register</span><input placeholder="Full name"><input placeholder="Email"><input type="password" placeholder="Password"><button class="btn" data-login>Sign Up</button><span class="mob" data-sw="0">Have an account? Sign in</span></div>
-<div class="fc si"><h2>Sign In</h2><button class="sbtn" data-prov="google"><span class="gg">G</span>Continue with Google</button><span class="mu">or use your email account</span><input placeholder="Email"><input type="password" placeholder="Password"><span class="mu">Forgot your password?</span><button class="btn" data-login>Sign In</button><span class="mob" data-sw="1">New here? Create account</span></div>
+<div class="fc su"><h2>Create Account</h2><span class="mu">or use your email to register</span><input placeholder="Full name"><input placeholder="Email"><input type="password" placeholder="Password"><button class="btn" data-login>Sign Up</button><span class="mob" data-sw="0">Have an account? Sign in</span></div>
+<div class="fc si"><h2>Sign In</h2><span class="mu">or use your email account</span><input placeholder="Email"><input type="password" placeholder="Password"><span class="mu">Forgot your password?</span><button class="btn" data-login>Sign In</button><span class="mob" data-sw="1">New here? Create account</span></div>
 <div class="oc"><div class="ov"><div class="op ol"><h2>Welcome Back!</h2><p>Log in to keep guarding your code.</p><button class="btn" data-sw="0">Sign In</button></div><div class="op or"><h2>Hello, Developer!</h2><p>Create an account and start reviewing projects today.</p><button class="btn" data-sw="1">Sign Up</button></div></div></div></div></div></section>
  
 <!-- DASHBOARD -->
