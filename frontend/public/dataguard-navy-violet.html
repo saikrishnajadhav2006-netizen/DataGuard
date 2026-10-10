@@ -292,7 +292,7 @@ a.btn{display:inline-block;text-decoration:none}
 <div class="dg-review-actions" id="dg-review-actions" hidden>
   <button type="button" id="dg-report-json">Download report (JSON)</button>
   <button type="button" id="dg-report-html">Download report (HTML)</button>
-  <button type="button" id="dg-download-all">Download all files (ZIP)</button>
+  <button type="button" id="dg-download-one">Download one file</button><select id="dg-file-select" aria-label="Choose file to download" style="max-width:220px;padding:8px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--ink)"><option value="">Choose file…</option></select><button type="button" id="dg-download-all">Download all files (ZIP)</button>
 </div><div class="bh"><div class="ring"><b>78</b></div><div class="tt"><h3>Quality gate passed</h3><div class="rt" style="margin-top:8px"><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#pulse"/></svg>Reliab.</div><div><i style="background:var(--warn)">B</i><svg class="i"><use href="#shield"/></svg>Security</div><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#cog"/></svg>Maint.</div></div></div><div class="ms"><b>128</b><svg class="i"><use href="#file"/></svg>Files</div><div class="ms"><b style="color:var(--bad)">3</b><svg class="i"><use href="#bug"/></svg>Issues</div><div class="ms"><b style="color:var(--ok)" id="fxd">19</b><svg class="i"><use href="#check"/></svg>Fixed</div></div>
 <div class="chat"><div class="chh"><div class="ba"><svg class="i"><use href="#bot"/></svg></div><div><b id="asn">DataGuard Assistant</b><br><small><span class="od"></span>Online · knows this scan</small></div><button class="ib" id="chs" title="Personalize chat"><svg class="i"><use href="#sliders"/></svg></button></div><div class="msgs" id="msgs"></div><div class="cp"><div class="chips" id="chips"></div><div class="cpb"><button class="ib" title="Attach"><svg class="i"><use href="#clip"/></svg></button><input id="q" placeholder="Ask about your code…"><button class="ib sd" id="sd"><svg class="i"><use href="#send"/></svg></button></div><small>AI-assisted analysis. Always review suggested changes before applying them.</small></div></div></div>
 <div class="body rv" id="dr"><div class="rin">
@@ -721,6 +721,7 @@ run();
      const body=await response.json().catch(()=>({message:'Server returned an unreadable response.'}));
      if(!response.ok)throw new Error(body.message||body.error||'Upload/review failed ('+response.status+').');
      latestZipBlob=zipBlob;showReview(body,zipBlob,files);
+     const fileSelect=$('#dg-file-select');if(fileSelect){fileSelect.innerHTML='<option value="">Choose file…</option>';files.forEach(file=>{const option=document.createElement('option');option.value=file.webkitRelativePath||file.name;option.textContent=file.webkitRelativePath||file.name;fileSelect.append(option)})}
      if(typeof window.bot==='function')window.bot('Review completed. Found '+((body.findings||[]).length)+' findings. Score: '+(body.qualityScore??'—')+'/100.',100);
      if(typeof window.loadHistory==='function')window.loadHistory();
    }catch(e){alert('Could not upload/review: '+e.message)}
@@ -734,9 +735,22 @@ run();
    ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag')}));
    ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag')}));
    zone.addEventListener('drop',e=>uploadFiles(e.dataTransfer.files));
-   const pick=$('#nw');if(pick)pick.addEventListener('click',e=>{e.preventDefault();$('#dg-zip-input').click()});
+   const pick=$('#nw');if(pick)pick.onclick=e=>{e.preventDefault();$('#dg-zip-input').click()};
  }
  $('#dg-report-json').onclick=()=>downloadReport('json');$('#dg-report-html').onclick=()=>downloadReport('html');
+ async function downloadOneFile(){
+   if(!latestReview?.id)return alert('Run a code review first.');
+   const path=$('#dg-file-select')?.value;if(!path)return alert('Choose a file first.');
+   try{
+     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+     const res=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(latestReview.id)+'/download',{headers:{Authorization:'Bearer '+auth()}});
+     if(!res.ok)throw new Error((await res.text())||'Download failed ('+res.status+').');
+     const zip=await window.JSZip.loadAsync(await res.blob());const entry=zip.file(path);
+     if(!entry)throw new Error('That file was not present in the downloaded archive.');
+     downloadBlob(await entry.async('blob'),path.split('/').pop()||'download');
+   }catch(e){alert('Could not download file: '+e.message)}
+ }
+ $('#dg-download-one').onclick=downloadOneFile;
  async function downloadReviewZip(){
    if(!latestReview?.id)return alert('Select a saved review first.');
    try{
@@ -850,7 +864,7 @@ run();
    setText('#fsub','Upload a project to begin');setText('#cnt','0 of 0 applied');setText('#fxd','0');
    $('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');
    if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a ZIP or files to see real findings here.</div>';
-   if($('#msgs'))$('#msgs').innerHTML='';
+   if($('#msgs'))$('#msgs').innerHTML=''; if(typeof window.ring==='function')window.ring(0); if($('#stt'))$('#stt').textContent='Upload a project to begin';
  }
  // Override fake default scan and reset controls so no demo scores/fixes appear.
  if(typeof window.run==='function')window.run=function(){if($('#dg-zip-input'))$('#dg-zip-input').click()};
