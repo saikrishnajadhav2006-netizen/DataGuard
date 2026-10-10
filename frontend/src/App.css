@@ -162,3 +162,81 @@ button { cursor: pointer; }
 .file-drop.dragging, .file-drop:focus-visible { border-color: #7c5cff; background: rgba(124, 92, 255, .09); box-shadow: 0 0 0 3px rgba(124, 92, 255, .15); }
 .file-drop small { overflow-wrap: anywhere; }
 .review-form .text-button { align-self: flex-start; }
+
+
+/* DataGuard navy + violet design system */
+:root {
+  --ink: #eef0ff;
+  --muted: #a6aed4;
+  --lavender-900: #080b1f;
+  --lavender-700: #7558ff;
+  --lavender-500: #9b87ff;
+  --lavender-200: #292e5b;
+  --surface: #0a0e25;
+  --line: #252b55;
+  --sage: #34d399;
+  --amber: #fbbf24;
+}
+body { background: #080b1f; color: #eef0ff; }
+.landing-page { background: radial-gradient(ellipse at 80% 5%, #24235d 0, #0b102b 42%, #070a1b 78%); color: #eef0ff; }
+.landing-nav, .auth-topbar { background: rgba(8, 11, 31, .94); border-bottom: 1px solid #252b55; }
+.landing-brand { color: #f0efff; }
+.landing-links a { color: #c5c9e8; }
+.pill-button, .auth-submit { background: linear-gradient(120deg, #6c55f5, #a084ff); box-shadow: 0 10px 26px #654cf044; }
+.pill-button:hover, .auth-submit:hover { filter: brightness(1.08); }
+.hero-copy h1 span { color: #a28cff; }
+.hero-copy > p:not(.eyebrow), .hero-copy small, .section-intro p { color: #b3badc; }
+.eyebrow { color: #a28cff; }
+.hero-visual { background: radial-gradient(circle at 50% 45%, #29245e, #101638 68%, #0b102b); border: 1px solid #292e5b; }
+.route-sign { background: #11183e; border-color: #34396d; color: #e9eaff; }
+.stack-strip { background: #0d1230; border-block: 1px solid #252b55; color: #b8c0e4; }
+.landing-section { color: #eef0ff; }
+.feature-card, .steps-grid > div, .landing-stats > div { background: #111735; border: 1px solid #272e5b; color: #eef0ff; box-shadow: 0 16px 45px #03061630; }
+.feature-card p, .steps-grid p, .landing-stats span { color: #aeb6dc; }
+.code-snippet { background: #080d23; color: #d9dcf5; border-color: #2b315e; }
+.landing-cta { background: linear-gradient(120deg, #171b49, #31245e); border: 1px solid #39346e; }
+.landing-cta a { background: #795fff; color: white; }
+.landing-footer { background: #080b1f; border-top: 1px solid #252b55; color: #d5d9f3; }
+.landing-footer p, .landing-footer a, .landing-footer span { color: #aab2d7; }
+.auth-reference-page { background: radial-gradient(ellipse at 80% 10%, #25235f, #0b102b 55%, #070a1b); color: #eef0ff; }
+.auth-split-card { background: #11183f; border: 1px solid #2b3265; box-shadow: 0 28px 80px #03061680; }
+.auth-form-side { background: #11183f; color: #eef0ff; }
+.auth-form-side h1 { color: #f0efff; }
+.auth-divider, .auth-mobile-link { color: #aeb6dc; }
+.auth-form-side input { background: #0a102d; color: #f6f6ff; border-color: #303866; border-radius: 13px; }
+.auth-form-side input::placeholder { color: #7883b4; }
+.auth-form-side input:focus { border-color: #8b74ff; box-shadow: 0 0 0 3px #8b74ff33; }
+.auth-field { color: #c0c6e9; text-align: left; }
+.auth-submit { border-radius: 13px; }
+.auth-mobile-link a { color: #a28cff; }
+.auth-welcome-side { background: linear-gradient(145deg, #6752ed, #9a7cff); border-radius: 150px 24px 24px 150px; color: white; }
+.outline-button { border-color: #fff; }
+.scan-app { background: #080b1f; color: #eef0ff; }
+.scan-sidebar, .sidebar { background: #0b102b; color: #eef0ff; border-right: 1px solid #252b55; }
+.scan-sidebar { background: #0b102b; }
+.scan-search, .scan-item.active, .scan-item:hover, .side-link:hover, .side-link.active { background: #202653; }
+.scan-nav a { color: #c3c9e8; }
+.scan-nav a.selected { background: #28285e; color: #fff; }
+.scan-header, .stat-card, .review-list, .finding-panel, .content-section, .review-row, .scan-card, .quality-card, .assistant-panel, .scan-content-card { background: #111735; color: #eef0ff; border-color: #292f5b; }
+.scan-header { border-bottom-color: #292f5b; }
+.scan-project-title p, .scan-item b, .finding-main p, .finding-main small { color: #aab2d7; }
+.scan-item { color: #dfe2fb; }
+.scan-user { border-top-color: #292f5b; }
+.scan-main input, .scan-main textarea, .scan-main select { background: #0b102b; color: #eef0ff; border-color: #303866; }
+.scan-main input::placeholder, .scan-main textarea::placeholder { color: #8791bd; }
+.modal { background: #111735; color: #eef0ff; border-color: #303866; }
+.modal-copy, .modal label { color: #b9c1e5; }
+.review-form input { background: #0b102b; color: #eef0ff; border-color: #303866; }
+.file-drop { background: #0b102b; border-color: #3b4277; color: #dfe2ff; }
+.file-drop small { color: #9ca7d6; }
+.icon-button { color: #b3a5ff; border-color: #303866; }
+.form-error { color: #ff8caa; }
+.empty-state, .empty-findings { color: #aab2d7; }
+.primary-button, .new-scan-button, .rescan-button, .fix-button { background: linear-gradient(120deg, #6c55f5, #9b7bff); color: white; }
+.primary-button:hover, .floating-new-review:hover { background: #5d47dc; }
+@media (max-width: 700px) {
+  .auth-split-card { grid-template-columns: 1fr; width: min(100% - 24px, 520px); margin: 24px auto; }
+  .auth-welcome-side { min-height: 230px; border-radius: 60px 60px 20px 20px; padding: 32px 24px; }
+  .auth-form-side { padding: 30px 22px; }
+  .landing-links { gap: 12px; }
+}
