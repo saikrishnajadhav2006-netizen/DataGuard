@@ -399,6 +399,7 @@ run();
   const API_BASE = (window.DATAGUARD_API_URL || '').replace(/\/$/, '');
   const $id = (id) => document.getElementById(id);
   const token = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}').token || ''; } catch (_) { return ''; } };
+  let activeReviewId = null;
   const session = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch (_) { return {}; } };
   async function api(path, options) {
     options = options || {};
@@ -458,6 +459,11 @@ run();
   fileInput.type = 'file'; fileInput.accept = '.zip,application/zip,application/x-zip-compressed'; fileInput.hidden = true; fileInput.id = 'dg-project-upload';
   document.body.appendChild(fileInput);
   const originalRun = window.run;
+  clearInterval(tm); msgs.innerHTML = ''; $('#pbi').style.width = '0%'; $('#pc').textContent = '0%'; st('done', token() ? 'Ready · select a ZIP to review' : 'Sign in to begin a review');
+  const fakeApplyAll = $id('aa'); if (fakeApplyAll) fakeApplyAll.hidden = true;
+  const fakePatch = $id('dp'); if (fakePatch) fakePatch.hidden = true;
+  const downloadButton = document.createElement('button'); downloadButton.id = 'dg-download-review'; downloadButton.className = 'pr'; downloadButton.textContent = 'Download reviewed ZIP'; downloadButton.hidden = true; const actionFooter = document.querySelector('.fx .ff'); if (actionFooter) actionFooter.insertBefore(downloadButton, actionFooter.firstChild);
+  downloadButton.onclick = async () => { if (!activeReviewId) return; try { const response = await fetch(API_BASE + '/api/projects/reviews/' + activeReviewId + '/download', { headers: { Authorization: 'Bearer ' + token() } }); if (!response.ok) throw new Error(await response.text() || 'Download failed.'); const blob = await response.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dataguard-reviewed-project.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch (error) { addB('<b>Download failed</b><br>' + esc(error.message)); } };
   async function loadHistory() {
     if (!token()) return;
     try {
@@ -487,11 +493,13 @@ run();
     if (!review) return;
     if (document.querySelector('#tc .pj b')) document.querySelector('#tc .pj b').textContent = review.projectName || 'Project review';
     if (document.querySelector('#tr .pj b')) document.querySelector('#tr .pj b').textContent = review.projectName || 'Project review';
+    activeReviewId = review.id;
+    if (downloadButton) downloadButton.hidden = false;
     const score = Number(review.qualityScore || 0); ring(score);
     st('done', 'Quality checked · ' + score + '/100 · ' + (review.findings || []).length + ' issues');
     rdy = true; app.classList.add('rdy');
     const mapped = (review.findings || []).map(f => ({
-      f: f.filePath || 'project', l: f.lineNumber || 1, t: f.title || 'Code quality finding',
+      id: f.id, f: f.filePath || 'project', l: f.lineNumber || 1, t: f.title || 'Code quality finding',
       s: /critical/i.test(f.severity || '') ? 'Critical' : /high|major/i.test(f.severity || '') ? 'Major' : 'Minor',
       c: /critical|high/i.test(f.severity || '') ? 'var(--bad)' : /medium|major/i.test(f.severity || '') ? 'var(--warn)' : 'var(--a2)',
       d: [['', f.lineNumber || 1, f.evidence || f.recommendation || 'Review this finding.']]
