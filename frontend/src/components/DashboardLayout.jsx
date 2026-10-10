@@ -19,7 +19,7 @@ export default function DashboardLayout({ children, onNewReview }) {
     <div className="app-shell">
       <aside className="sidebar">
         <button className="brand" onClick={() => navigate('/dashboard')}>
-          <Shield size={22} />
+          <Shield className="brand-shield" size={22} fill="currentColor" strokeWidth={1.6} />
           <span>DataGuard AI</span>
         </button>
         <nav className="side-nav" aria-label="Main navigation">
