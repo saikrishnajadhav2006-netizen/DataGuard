@@ -33,49 +33,17 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 3
 .mock{padding:22px;box-shadow:var(--sh)}.mock .chs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.mock .fake{border:1px solid var(--bd);border-radius:14px;padding:14px;color:var(--mu);font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cta{border-radius:28px;background:var(--ag);color:var(--onb);text-align:center;padding:54px 20px;margin:40px 0;box-shadow:0 30px 80px var(--glow)}.cta h2{font-size:32px;margin-bottom:18px}.cta .btn{background:#fff;color:var(--a);box-shadow:none}
 footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 24px;border-top:1px solid var(--bd)}
-/* auth — stable two-panel layout with a clear, unclipped switch panel */
-.stage{display:grid;place-items:center;padding:42px 20px 56px}
-.box{position:relative;width:990px;max-width:100%;height:560px;background:var(--card2);border-radius:28px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--bd);isolation:isolate}
-.fc{position:absolute;top:0;height:100%;width:50%;transition:transform .55s ease,opacity .35s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:36px 54px;text-align:center;box-sizing:border-box}
-.fc h2{font-size:clamp(26px,3vw,32px);margin:0 0 2px}
-.fc>.mu{margin:0 0 8px;max-width:100%}
-.fc input{width:100%;max-width:390px;min-height:52px;background:var(--card2);border-color:var(--bd);color:var(--ink)}
-.fc [data-login]{min-width:146px;margin-top:2px}
-.fc [role=alert]{width:100%;min-height:0;margin:0;font-size:13px;color:var(--bad)}
-.fc [role=alert]:empty{display:none}
-.fc [data-switch-label]{font-size:13px;color:var(--mu)}
-.si{left:0;z-index:2;opacity:1;transform:translateX(0)}
-.su{left:0;opacity:0;z-index:1;transform:translateX(0);pointer-events:none}
-.box.act .si{transform:translateX(100%);opacity:0;pointer-events:none}
-.box.act .su{transform:translateX(100%);opacity:1;z-index:5;pointer-events:auto}
+/* auth */
+.stage{display:grid;place-items:center;padding:60px 20px}
+.box{position:relative;width:900px;max-width:100%;height:540px;background:var(--card2);border-radius:28px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--bd)}
+.fc{position:absolute;top:0;height:100%;width:50%;transition:all .6s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:0 44px;text-align:center}.fc h2{font-size:30px}
+.si{left:0;z-index:2}.su{left:0;opacity:0;z-index:1}.box.act .si{transform:translateX(100%)}.box.act .su{transform:translateX(100%);opacity:1;z-index:5}
 .soc{display:flex;gap:10px}.soc span{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);display:grid;place-items:center;font-weight:700;color:var(--a2)}
 input,textarea{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:13px 18px;font:15px 'Inter';width:100%;color:var(--ink);outline:0}input:focus,textarea:focus{border-color:var(--a)}
-.oc{position:absolute;top:0;left:50%;width:50%;height:100%;overflow:hidden;transition:transform .55s ease,border-radius .55s ease;z-index:10;border-radius:120px 0 0 120px}
-.box.act .oc{transform:translateX(-100%);border-radius:0 120px 120px 0}
-.ov{background:var(--ag);color:var(--onb);position:relative;left:-100%;height:100%;width:200%;transition:transform .55s ease}
-.box.act .ov{transform:translateX(50%)}
-.op{position:absolute;top:0;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:30px 28px;box-sizing:border-box;transition:transform .55s ease}
-.op h2{font-size:clamp(25px,3vw,32px);line-height:1.2;max-width:100%;overflow-wrap:anywhere}
-.op p{font-size:16px;line-height:1.55;max-width:290px;margin:0}
-.ol{left:0;transform:translateX(-8%)}
-.or{right:0;transform:translateX(8%)}
-.box.act .ol{transform:translateX(0)}
-.box.act .or{transform:translateX(0)}
-.ov .btn{background:transparent;border:2px solid var(--onb);color:var(--onb);box-shadow:none;min-width:124px}
-.mob{display:block;color:var(--a2);font-weight:700;cursor:pointer;margin-top:4px;font-size:13px}
-.mob:hover{text-decoration:underline}
-@media(max-width:720px){
- .stage{padding:28px 14px 40px}
- .box{height:auto;min-height:590px;border-radius:24px}
- .fc{position:relative;width:100%;height:auto;min-height:540px;padding:40px 26px}
- .si,.su{left:0;top:0}
- .box.act .si,.box.act .su{transform:none}
- .box:not(.act) .su{display:none}
- .box.act .si{display:none}
- .box.act .su{display:flex}
- .oc{display:none}
- .fc input{max-width:420px}
-}
+.oc{position:absolute;top:0;left:50%;width:50%;height:100%;overflow:hidden;transition:all .6s ease;z-index:100;border-radius:120px 0 0 120px}.box.act .oc{transform:translateX(-100%);border-radius:0 120px 120px 0}
+.ov{background:var(--ag);color:var(--onb);position:relative;left:-100%;height:100%;width:200%;transition:transform .6s ease}.box.act .ov{transform:translateX(50%)}
+.op{position:absolute;top:0;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 44px;transition:transform .6s ease}.op h2{font-size:32px}.ol{transform:translateX(-20%)}.or{right:0}.box.act .ol{transform:translateX(0)}.box.act .or{transform:translateX(20%)}
+.ov .btn{background:transparent;border:2px solid var(--onb);color:var(--onb);box-shadow:none}.mob{display:none;color:var(--a2);font-weight:700;cursor:pointer}
 /* dashboard */
 .app{display:flex;height:calc(100vh - var(--pb,44px));min-height:600px;overflow:hidden;position:relative}
 .side{width:264px;flex:none;margin:12px 0 12px 12px;border-radius:26px;background:var(--sbg);backdrop-filter:blur(18px);border:1px solid var(--bd);box-shadow:var(--sh);color:var(--sbt);display:flex;flex-direction:column;padding:14px 12px;transition:margin .3s;min-height:0;z-index:30;position:relative}
@@ -280,20 +248,11 @@ a.btn{display:inline-block;text-decoration:none}
 <div class="r"><button class="ib thm" id="mt" title="Light / dark"><svg class="i"><use href="#sun"/></svg></button><button class="ib" data-pp="hp" title="Recent searches"><svg class="i"><use href="#clock"/></svg></button><button class="ib" data-pp="sp" title="Saved tools"><svg class="i"><use href="#bm"/></svg></button><div class="cr"><svg class="i"><use href="#bolt"/></svg><b id="cr">987</b> credits</div><div class="av dp tdp" title="Profile and photo">D</div></div>
 <div class="pp" id="hp"><h5>RECENT SEARCHES</h5><div id="hl"></div></div><div class="pp" id="sp"><h5>SAVED TOOLS</h5><div id="sl"><a class="mu">Nothing saved yet</a></div></div></header>
 <div class="rp" id="rp"><button class="x" id="rpx"><svg class="i" style="width:16px;height:16px"><use href="#x"/></svg></button><b><svg class="i"><use href="#globe"/></svg>Need AI tool suggestions?</b><p>Find the right AI tools to fix, test and improve your project with AI Radar.</p><button class="btn" id="rpg" style="padding:9px 18px;font-size:13px">Open AI Radar →</button></div>
-<div class="body" id="dc">
-<div class="dg-upload" id="dg-upload-zone">
-  <div class="dg-upload-icon" aria-hidden="true">↥</div>
-  <div class="dg-upload-copy"><b>Upload a project to review</b><small>Choose ZIP, one or more files, or drag a ZIP/files here. Maximum total size: 25 MB.</small></div>
-  <button class="btn" type="button" id="dg-pick-files">Choose files</button>
-  <button class="dg-tool-action" type="button" id="dg-pick-zip">Choose ZIP</button>
-  <input type="file" id="dg-files-input" multiple hidden>
-  <input type="file" id="dg-zip-input" accept=".zip,application/zip,application/x-zip-compressed" hidden>
-</div>
-<div class="dg-review-actions" id="dg-review-actions" hidden>
-  <button type="button" id="dg-report-json">Download report (JSON)</button>
-  <button type="button" id="dg-report-html">Download report (HTML)</button>
-  <button type="button" id="dg-download-one">Download one file</button><select id="dg-file-select" aria-label="Choose file to download" style="max-width:220px;padding:8px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--ink)"><option value="">Choose file…</option></select><button type="button" id="dg-download-all">Download all files (ZIP)</button>
-</div><div class="bh"><div class="ring"><b>78</b></div><div class="tt"><h3>Quality gate passed</h3><div class="rt" style="margin-top:8px"><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#pulse"/></svg>Reliab.</div><div><i style="background:var(--warn)">B</i><svg class="i"><use href="#shield"/></svg>Security</div><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#cog"/></svg>Maint.</div></div></div><div class="ms"><b>128</b><svg class="i"><use href="#file"/></svg>Files</div><div class="ms"><b style="color:var(--bad)">3</b><svg class="i"><use href="#bug"/></svg>Issues</div><div class="ms"><b style="color:var(--ok)" id="fxd">19</b><svg class="i"><use href="#check"/></svg>Fixed</div></div>
+<div class="body" id="dc"><div class="dg-upload" id="dg-upload-zone">
+ <div class="dg-upload-icon" aria-hidden="true">↥</div><div class="dg-upload-copy"><b>Upload a project to review</b><small>ZIP or source files · drag and drop · maximum 25 MB total</small></div>
+ <button class="btn" type="button" id="dg-pick-files">Choose files</button><button class="btn" type="button" id="dg-pick-zip">Choose ZIP</button>
+ <input id="dg-files-input" type="file" multiple hidden><input id="dg-zip-input" type="file" accept=".zip,application/zip" hidden>
+</div><div id="dg-review-actions" class="dg-report-bar" hidden></div><div class="bh"><div class="ring"><b>78</b></div><div class="tt"><h3>Quality gate passed</h3><div class="rt" style="margin-top:8px"><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#pulse"/></svg>Reliab.</div><div><i style="background:var(--warn)">B</i><svg class="i"><use href="#shield"/></svg>Security</div><div><i style="background:var(--ok)">A</i><svg class="i"><use href="#cog"/></svg>Maint.</div></div></div><div class="ms"><b>128</b><svg class="i"><use href="#file"/></svg>Files</div><div class="ms"><b style="color:var(--bad)">3</b><svg class="i"><use href="#bug"/></svg>Issues</div><div class="ms"><b style="color:var(--ok)" id="fxd">19</b><svg class="i"><use href="#check"/></svg>Fixed</div></div>
 <div class="chat"><div class="chh"><div class="ba"><svg class="i"><use href="#bot"/></svg></div><div><b id="asn">DataGuard Assistant</b><br><small><span class="od"></span>Online · knows this scan</small></div><button class="ib" id="chs" title="Personalize chat"><svg class="i"><use href="#sliders"/></svg></button></div><div class="msgs" id="msgs"></div><div class="cp"><div class="chips" id="chips"></div><div class="cpb"><button class="ib" title="Attach"><svg class="i"><use href="#clip"/></svg></button><input id="q" placeholder="Ask about your code…"><button class="ib sd" id="sd"><svg class="i"><use href="#send"/></svg></button></div><small>AI-assisted analysis. Always review suggested changes before applying them.</small></div></div></div>
 <div class="body rv" id="dr"><div class="rin">
 <div class="rdr" id="rdr"><div class="circ"><div class="sweep"></div></div><i class="wv"></i><i class="wv"></i><i class="wv"></i><div id="bks"></div><div class="lgc"><div class="lg"><svg class="i" style="width:32px;height:32px"><use href="#globe"/></svg></div></div></div>
@@ -632,423 +591,319 @@ run();
   loadHistory();
 })();
 </script>
-
-<style id="dataguard-quality-fixes">
-/* Real review/upload and Radar presentation */
-.cr{display:none!important}
-.dg-upload{border:2px dashed var(--a);border-radius:18px;padding:18px 22px;margin:0 0 16px;background:var(--card);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.dg-upload.drag{background:var(--ag);outline:3px solid var(--a)}
-.dg-upload .dg-upload-copy{flex:1;min-width:180px}.dg-upload b{display:block;margin-bottom:4px}.dg-upload small{color:var(--mu)}
-.dg-upload .btn{white-space:nowrap}
-.dg-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
-.dg-review-actions button,.dg-tool-action{border:1px solid var(--bd);border-radius:10px;padding:8px 12px;background:var(--card);color:var(--ink);cursor:pointer}
-.dg-radar-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:18px 0}
-.dg-tool{border:1px solid var(--bd);border-radius:16px;background:var(--card);padding:16px;min-width:0;box-shadow:var(--sh)}
-.dg-tool-head{display:flex;align-items:flex-start;gap:11px}.dg-tool-icon{width:46px;height:46px;border-radius:12px;background:var(--ag);display:grid;place-items:center;font-size:24px;flex-shrink:0}
-.dg-tool h4{margin:1px 0 5px;line-height:1.3;overflow-wrap:anywhere}.dg-tool .dg-price{font-weight:700;color:var(--a2);font-size:13px}
-.dg-tool p{font-size:13px;line-height:1.5;color:var(--mu);margin:12px 0}
-.dg-tags{display:flex;gap:6px;flex-wrap:wrap}.dg-tag{font-size:11px;border-radius:999px;padding:4px 8px;background:var(--ag);color:var(--a2)}
-.dg-tool-actions{display:flex;gap:8px;margin-top:12px}.dg-tool-actions a,.dg-tool-actions button{flex:1;text-align:center;border:1px solid var(--bd);border-radius:9px;padding:8px 9px;background:var(--card);color:var(--ink);font:inherit;font-size:12px;cursor:pointer;text-decoration:none}
-.dg-history-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--mu);margin:12px 0 8px}
-.dg-empty{grid-column:1/-1;border:1px dashed var(--bd);border-radius:14px;padding:24px;text-align:center;color:var(--mu)}
-@media(max-width:700px){.dg-upload{align-items:flex-start}.dg-upload .btn{width:100%}.dg-radar-results{grid-template-columns:1fr}}
-</style>
-<script id="dataguard-quality-fixes-js">
+<script>
+/* DataGuard live API bridge: all real auth/reviews/AI requests go through Spring Boot. */
+(function () {
+  const API_BASE = (window.DATAGUARD_API_URL || '').replace(/\/$/, '');
+  const $id = (id) => document.getElementById(id);
+  const token = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}').token || ''; } catch (_) { return ''; } };
+  let activeReviewId = null;
+  const session = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch (_) { return {}; } };
+  async function api(path, options) {
+    options = options || {};
+    const headers = new Headers(options.headers || {});
+    if (!(options.body instanceof FormData) && options.body != null && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    if (token() && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token());
+    const response = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+    const type = response.headers.get('content-type') || '';
+    const body = type.includes('application/json') ? await response.json() : await response.text();
+    if (!response.ok) throw new Error(typeof body === 'string' ? (body || 'Request failed (' + response.status + ')') : body.message || body.error || 'Request failed (' + response.status + ')');
+    return body;
+  }
+  function showError(id, message) { const node = $id(id); if (node) { node.textContent = message || ''; node.style.color = message ? 'var(--bad)' : ''; } }
+  function userFromAuth(auth) { return { n: auth.fullName || auth.name || auth.email, e: auth.email || '', l: 'email' }; }
+  function applySession(auth) {
+    localStorage.setItem('dataguard-auth', JSON.stringify(auth));
+    loggedIn = true; user = userFromAuth(auth); pending = pending || 'check';
+    if (typeof P !== 'undefined') { P.name = user.n; try { localStorage.setItem('dg-prefs', JSON.stringify(P)); } catch (_) {} }
+    if (typeof upd === 'function') upd();
+    const destination = pending || 'check'; pending = null;
+    go(destination);
+  }
+  async function submitAuth(mode) {
+    const register = mode === 'register';
+    const name = register ? ($id('dg-register-name').value || '').trim() : '';
+    const email = ($id(register ? 'dg-register-email' : 'dg-login-email').value || '').trim().toLowerCase();
+    const password = $id(register ? 'dg-register-password' : 'dg-login-password').value || '';
+    const errorId = register ? 'dg-auth-error-register' : 'dg-auth-error-login';
+    showError(errorId, '');
+    if (register && !name) return showError(errorId, 'Enter your full name.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return showError(errorId, 'Enter a valid email address.');
+    if (!password || (register && password.length < 8)) return showError(errorId, register ? 'Use a password with at least 8 characters.' : 'Enter your password.');
+    const buttons = Array.from(document.querySelectorAll(register ? '.fc.su [data-login]' : '.fc.si [data-login]'));
+    buttons.forEach(b => { b.disabled = true; b.dataset.original = b.textContent; b.textContent = register ? 'Creating account…' : 'Signing in…'; });
+    try {
+      const auth = await api('/api/auth/' + (register ? 'register' : 'login'), {
+        method: 'POST',
+        body: JSON.stringify(register ? { fullName: name, email: email, password: password } : { email: email, password: password })
+      });
+      if (!auth || !auth.token) throw new Error('The server did not return a JWT. Please try again.');
+      applySession(auth);
+    } catch (error) {
+      showError(errorId, error.message || 'Authentication failed.');
+    } finally {
+      buttons.forEach(b => { b.disabled = false; b.textContent = b.dataset.original || (register ? 'Sign Up' : 'Sign In'); });
+    }
+  }
+  window.signOutUser = function () {
+    localStorage.removeItem('dataguard-auth'); loggedIn = false; user = null; pending = null;
+    show('home'); if (typeof upd === 'function') upd(); go('home');
+  };
+  window.finish = function () { submitAuth(document.querySelector('#box')?.classList.contains('act') ? 'register' : 'login'); };
+  document.querySelectorAll('.fc.su [data-login]').forEach(b => b.onclick = () => submitAuth('register'));
+  document.querySelectorAll('.fc.si [data-login]').forEach(b => b.onclick = () => submitAuth('login'));
+  document.querySelectorAll('[data-out]').forEach(b => b.onclick = window.signOutUser);
+  if ($id('navReg')) $id('navReg').onclick = () => { $id('box').classList.add('act'); window.go('auth'); };
+  if ($id('navLog')) $id('navLog').onclick = () => { $id('box').classList.remove('act'); window.go('auth'); };
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file'; fileInput.accept = '.zip,application/zip,application/x-zip-compressed'; fileInput.hidden = true; fileInput.id = 'dg-project-upload';
+  document.body.appendChild(fileInput);
+  const originalRun = window.run;
+  clearInterval(tm); msgs.innerHTML = ''; $('#pbi').style.width = '0%'; $('#pc').textContent = '0%'; st('done', token() ? 'Ready · select a ZIP to review' : 'Sign in to begin a review');
+  const fakeApplyAll = $id('aa'); if (fakeApplyAll) fakeApplyAll.hidden = true;
+  const fakePatch = $id('dp'); if (fakePatch) fakePatch.hidden = true;
+  const downloadButton = document.createElement('button'); downloadButton.id = 'dg-download-review'; downloadButton.className = 'pr'; downloadButton.textContent = 'Download reviewed ZIP'; downloadButton.hidden = true; const actionFooter = document.querySelector('.fx .ff'); if (actionFooter) actionFooter.insertBefore(downloadButton, actionFooter.firstChild);
+  downloadButton.onclick = async () => { if (!activeReviewId) return; try { const response = await fetch(API_BASE + '/api/projects/reviews/' + activeReviewId + '/download', { headers: { Authorization: 'Bearer ' + token() } }); if (!response.ok) throw new Error(await response.text() || 'Download failed.'); const blob = await response.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dataguard-reviewed-project.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch (error) { addB('<b>Download failed</b><br>' + esc(error.message)); } };
+  async function loadHistory() {
+    if (!token()) return;
+    try {
+      const reviews = await api('/api/projects/reviews');
+      const list = document.querySelector('.pn');
+      if (!list) return;
+      list.innerHTML = '';
+      const groups = [['Today', []], ['Previous 7 days', []], ['Older', []]];
+      const now = Date.now();
+      reviews.forEach(review => {
+        const days = review.reviewDate ? Math.floor((now - new Date(review.reviewDate).getTime()) / 86400000) : 9;
+        groups[days <= 0 ? 0 : days <= 7 ? 1 : 2][1].push(review);
+      });
+      groups.forEach(([label, items]) => {
+        if (!items.length) return;
+        const heading = document.createElement('div'); heading.className = 'gl'; heading.textContent = label; list.appendChild(heading);
+        items.forEach(review => {
+          const item = document.createElement('a'); item.className = 'hi'; item.href = '#'; item.innerHTML = '<s style="--c:var(--a2)"></s><span></span><em></em>';
+          item.querySelector('span').textContent = review.projectName || 'Project review'; item.querySelector('em').textContent = review.qualityScore == null ? '—' : review.qualityScore;
+          item.onclick = event => { event.preventDefault(); displayReview(review); }; list.appendChild(item);
+        });
+      });
+      if (!reviews.length) { const empty = document.createElement('p'); empty.className = 'mu'; empty.textContent = 'Your saved reviews will appear here.'; list.appendChild(empty); }
+    } catch (error) { console.error('Could not load review history:', error); }
+  }
+  function displayReview(review) {
+    if (!review) return;
+    if (document.querySelector('#tc .pj b')) document.querySelector('#tc .pj b').textContent = review.projectName || 'Project review';
+    if (document.querySelector('#tr .pj b')) document.querySelector('#tr .pj b').textContent = review.projectName || 'Project review';
+    activeReviewId = review.id;
+    if (downloadButton) downloadButton.hidden = false;
+    const score = Number(review.qualityScore || 0); ring(score);
+    st('done', 'Quality checked · ' + score + '/100 · ' + (review.findings || []).length + ' issues');
+    rdy = true; app.classList.add('rdy');
+    const mapped = (review.findings || []).map(f => ({
+      id: f.id, f: f.filePath || 'project', l: f.lineNumber || 1, t: f.title || 'Code quality finding',
+      s: /critical/i.test(f.severity || '') ? 'Critical' : /high|major/i.test(f.severity || '') ? 'Major' : 'Minor',
+      c: /critical|high/i.test(f.severity || '') ? 'var(--bad)' : /medium|major/i.test(f.severity || '') ? 'var(--warn)' : 'var(--a2)',
+      d: [['', f.lineNumber || 1, f.evidence || f.recommendation || 'Review this finding.']]
+    }));
+    F.splice(0, F.length, ...mapped);
+    renderFx(); $('#fsub').textContent = mapped.length + ' findings from saved review'; $('#cnt').textContent = '0 of ' + mapped.length + ' applied';
+    $('#fl').querySelectorAll('.fcd').forEach(card => { const b = card.querySelector('.ap1'); if (b) { b.textContent = 'Request fix suggestion'; b.onclick = async () => {
+      try { const result = await api('/api/projects/reviews/' + review.id + '/findings/' + mapped[Array.from(card.parentNode.children).indexOf(card)].id + '/fix', { method: 'POST' }); addB('<b>Suggested fix</b><br>' + esc(result.description || result.suggestedCode || 'Review the recommendation before applying it.')); }
+      catch (e) { addB('<b>Could not load fix suggestion</b><br>' + esc(e.message)); }
+    }; } });
+  }
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0]; if (!file) return;
+    if (!token()) { pending = 'check'; go('auth'); fileInput.value = ''; return; }
+    if (!file.name.toLowerCase().endsWith('.zip')) { addB('Please select a ZIP archive.'); fileInput.value = ''; return; }
+    st('run', 'Uploading and reviewing ' + file.name + '…'); $('#pbi').style.width = '15%'; $('#pc').textContent = '15%';
+    const form = new FormData(); form.append('name', file.name.replace(/\.zip$/i, '')); form.append('file', file);
+    try {
+      const review = await api('/api/projects/upload', { method: 'POST', body: form });
+      $('#pbi').style.width = '100%'; $('#pc').textContent = '100%';
+      displayReview(review); bot('Review completed by the backend. Found ' + (review.findings || []).length + ' findings. Score: ' + (review.qualityScore ?? 'not available') + '/100.');
+      loadHistory();
+    } catch (error) {
+      st('done', 'Review failed'); bot('<b>Could not review this project</b><br>' + esc(error.message || 'The server could not process the ZIP.'));
+    } finally { fileInput.value = ''; }
+  });
+  function chooseProject() { if (!token()) { pending = 'check'; go('auth'); return; } fileInput.click(); }
+  $('#nw').onclick = chooseProject;
+  window.run = chooseProject;
+  document.querySelectorAll('[data-pg="check"]').forEach(b => b.addEventListener('click', () => { if (token()) setTimeout(() => fileInput.click(), 80); }));
+  window.go = function (page) {
+    if (['check', 'radar'].includes(page) && !token()) {
+      pending = page; const note = $id('lnote'); if (note) { note.hidden = false; note.textContent = 'Please sign in to continue. Your destination will open after login.'; }
+      page = 'auth';
+    } else if (page === 'home') pending = null;
+    if (['check', 'radar'].includes(page)) { show('dash'); setDv(page); if (page === 'check' && token()) loadHistory(); }
+    else show(page);
+    document.querySelectorAll('.pg').forEach(b => b.classList.toggle('on', b.dataset.pg === page));
+    if (page === 'auth' && $id('box')) { /* preserve the user's Sign In / Sign Up selection */ }
+  };
+  const oldSend = window.send;
+  window.send = async function (text) {
+    text = (text || $('#q').value || '').trim(); if (!text) return;
+    $('#q').value = ''; addU(text);
+    if (!token()) { addB('Please sign in to use the AI assistant.'); pending = 'check'; go('auth'); return; }
+    try {
+      const result = await api('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message: text }) });
+      addB(esc(result.reply || result.response || result.message || 'The AI returned an empty response.'));
+    } catch (error) { addB('<b>AI request failed</b><br>' + esc(error.message || 'Check the backend AI configuration.')); }
+  };
+  $('#sd').onclick = () => window.send();
+  $('#q').onkeydown = event => { if (event.key === 'Enter') window.send(); };
+  const originalCards = window.cards;
+  window.cards = async function (label) {
+    const prompt = ($('#fq').value || '').trim() || label;
+    if (!token()) { addB('Please sign in to use AI Radar.'); pending = 'radar'; go('auth'); return; }
+    $('#out').textContent = 'Finding tools with AI…';
+    try {
+      const result = await api('/api/ai/radar', { method: 'POST', body: JSON.stringify({ prompt: prompt, mode: 'find', category: document.querySelector('#cats .on')?.textContent || '' }) });
+      const panel = document.createElement('div'); panel.className = 'res';
+      const heading = document.createElement('h4'); heading.textContent = 'AI Radar results'; panel.appendChild(heading);
+      const text = document.createElement('p'); text.style.whiteSpace = 'pre-wrap'; text.textContent = result.reply || result.response || result.message || 'No results were returned.'; panel.appendChild(text);
+      $('#out').replaceChildren(panel);
+    } catch (error) { $('#out').textContent = 'AI Radar could not load results: ' + error.message; }
+  };
+  window.flow0 = async function () {
+    const prompt = ($('#wq').value || '').trim(); if (!prompt) return;
+    if (!token()) { pending = 'radar'; go('auth'); return; }
+    $('#out').textContent = 'Building your workflow with AI…';
+    try {
+      const result = await api('/api/ai/radar', { method: 'POST', body: JSON.stringify({ prompt: prompt, mode: 'workflow' }) });
+      const panel = document.createElement('div'); panel.className = 'res';
+      const heading = document.createElement('h4'); heading.textContent = 'AI-generated workflow'; panel.appendChild(heading);
+      const text = document.createElement('p'); text.style.whiteSpace = 'pre-wrap'; text.textContent = result.reply || result.response || result.message || 'No workflow was returned.'; panel.appendChild(text);
+      $('#out').replaceChildren(panel);
+    } catch (error) { $('#out').textContent = 'Workflow generation failed: ' + error.message; }
+  };
+  if (token()) {
+    const auth = session(); loggedIn = true; user = userFromAuth(auth);
+    if (typeof upd === 'function') upd();
+  } else { loggedIn = false; user = null; }
+  document.querySelectorAll('[data-pg="home"], .logo, .brand').forEach(el => { el.style.cursor = 'pointer'; el.addEventListener('click', () => window.go('home')); });
+  loadHistory();
+})();
+</script><style id="dg-functional-fixes">
+.dg-upload{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;margin:0 0 14px;border:2px dashed var(--a);border-radius:16px;background:var(--card)}
+.dg-upload.drag{outline:3px solid var(--a);background:var(--ag)}.dg-upload-copy{flex:1;min-width:190px}.dg-upload-copy b{display:block}.dg-upload-copy small{color:var(--mu)}
+.dg-report-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.dg-report-bar button{border:1px solid var(--bd);border-radius:10px;padding:8px 12px;background:var(--card);color:var(--ink);cursor:pointer}
+.dg-radar-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
+.dg-tool{min-width:0;display:flex;flex-direction:column;padding:16px;border-radius:16px;border:1px solid color-mix(in srgb,var(--a) 35%,var(--bd));background:linear-gradient(145deg,rgba(125,103,255,.13),var(--card));backdrop-filter:blur(14px);box-shadow:var(--sh)}
+.dg-tool-preview{height:110px;border-radius:12px;display:grid;place-items:center;font-size:38px;background:radial-gradient(circle,rgba(132,104,255,.35),rgba(132,104,255,.04));border:1px solid var(--bd);margin-bottom:12px}
+.dg-tool h4{margin:0 0 6px;overflow-wrap:anywhere}.dg-tool-price{font-weight:750;color:var(--a2);font-size:13px}.dg-tool-desc{font-size:13px;line-height:1.55;color:var(--mu);margin:12px 0}.dg-tool-desc[hidden]{display:none}
+.dg-tool-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.dg-tool-tag{font-size:11px;border-radius:999px;padding:4px 8px;background:var(--ag)}
+.dg-tool-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;padding-top:14px}.dg-tool-actions button,.dg-tool-actions a{flex:1;text-align:center;padding:8px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--ink);text-decoration:none;font:inherit;font-size:12px;cursor:pointer}
+.dg-empty{grid-column:1/-1;padding:24px;text-align:center;border:1px dashed var(--bd);border-radius:14px;color:var(--mu)}
+@media(max-width:1000px){.dg-radar-results{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.dg-radar-results{grid-template-columns:1fr}}
+</style><script id="dg-functional-fixes-js">
 (function(){
- const $=s=>document.querySelector(s), $=s=>Array.from(document.querySelectorAll(s));
- const apiBase=(window.DATAGUARD_API_URL||'').replace(/\/$/,'');
- const getSession=()=>{try{return JSON.parse(localStorage.getItem('dataguard-auth')||'{}')}catch(_){return {}}};
- const auth=()=>getSession().token||'';
- const escHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- let latestReview=null, latestZipBlob=null, reviewFiles=[], radarItems=[], radarQuery='', radarHistory=[];
- try{radarHistory=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}
- const loadScript=src=>new Promise((resolve,reject)=>{if(window.JSZip)return resolve();const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(new Error('Could not load the ZIP helper. Check your internet connection and retry.'));document.head.appendChild(el)});
- function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
- function setText(sel,text){const n=$(sel);if(n)n.textContent=text}
- function reviewName(r){return (r?.projectName||'dataguard-review').replace(/[^a-z0-9._-]+/gi,'-')}
- function updateReviewStats(r){
-   const findings=Array.isArray(r?.findings)?r.findings:[];
-   const fileCount=Number(r?.fileCount??r?.filesCount??r?.totalFiles??reviewFiles.length??0);
-   const score=Number(r?.qualityScore??0);
-   const stats=$('.bh .ms');
-   if(stats[0])stats[0].querySelector('b').textContent=String(fileCount);
-   if(stats[1])stats[1].querySelector('b').textContent=String(findings.length);
-   setText('#fxd','0');
-   if(stats[2])stats[2].querySelector('b').textContent='0';
-   $('.bh .tt h3').forEach(n=>n.textContent=findings.length?'Quality check completed':'Quality gate passed');
-   if(typeof window.ring==='function')window.ring(score);
-   setText('#fsub',findings.length+' findings from saved review');
-   setText('#cnt','0 of '+findings.length+' applied');
-   const acts=$('#dg-review-actions');if(acts)acts.hidden=false;
-   const upload=$('#dg-upload-zone');if(upload)upload.hidden=false;
- }
- function showReview(r,zipBlob,files){
-   latestReview=r;latestZipBlob=zipBlob||null;reviewFiles=files||[];
-   updateReviewStats(r);
-   const findings=Array.isArray(r?.findings)?r.findings:[];
-   if(!findings.length){
-     const m=$('#msgs');if(m){m.innerHTML='';if(typeof window.addB==='function')window.addB('Review completed. No issues were found, so there are no fixes to suggest.');}
-     const fl=$('#fl');if(fl)fl.innerHTML='<div class="dg-empty">No findings. There are no fixes to apply.</div>';
-     setText('#fsub','0 findings — no fixes needed');setText('#cnt','0 of 0 applied');
-   }
- }
- function downloadReport(format){
-   if(!latestReview)return alert('Run a code review first.');
-   const r=latestReview, findings=Array.isArray(r.findings)?r.findings:[];
-   if(format==='json')return downloadBlob(new Blob([JSON.stringify({projectName:r.projectName,reviewId:r.id,reviewDate:r.reviewDate,qualityScore:r.qualityScore,fileCount:reviewFiles.length||r.fileCount||r.totalFiles||null,findings,appliedFixes:0},null,2)],{type:'application/json'}),reviewName(r)+'-report.json');
-   const rows=findings.map(f=>'<tr><td>'+escHtml(f.severity)+'</td><td>'+escHtml(f.title)+'</td><td>'+escHtml(f.filePath)+'</td><td>'+escHtml(f.lineNumber)+'</td><td>'+escHtml(f.evidence||f.recommendation)+'</td></tr>').join('');
-   const doc='<!doctype html><html><head><meta charset="utf-8"><title>DataGuard Review Report</title><style>body{font:15px Arial;max-width:1100px;margin:36px auto;padding:0 20px;color:#18213c}h1{color:#705cf5}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f0edff}</style></head><body><h1>DataGuard AI — Code Review</h1><p><b>Project:</b> '+escHtml(r.projectName)+'</p><p><b>Score:</b> '+escHtml(r.qualityScore)+'/100 &nbsp; <b>Findings:</b> '+findings.length+' &nbsp; <b>Applied fixes:</b> 0</p><p><b>Review date:</b> '+escHtml(r.reviewDate||'')+'</p><table><thead><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Evidence / recommendation</th></tr></thead><tbody>'+rows+'</tbody></table>
-/* Final UX corrections: prevent brand navigation, derive downloads from current input,
-   reset all sample values, and render exactly nine AI Radar tool cards in 3 columns. */
-<style id="dg-final-ux-css">
-.dg-radar-results{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
-.dg-tool{display:flex;flex-direction:column;min-height:230px;background:linear-gradient(145deg,rgba(125,103,255,.12),var(--card));border:1px solid color-mix(in srgb,var(--a) 28%,var(--bd));backdrop-filter:blur(16px)}
-.dg-tool .dg-tool-head{align-items:center}.dg-tool .dg-tool-actions{margin-top:auto;padding-top:12px}
-.dg-tool .dg-preview{height:104px;border-radius:12px;background:radial-gradient(circle at 50% 35%,rgba(130,104,255,.32),rgba(130,104,255,.04));display:grid;place-items:center;font-size:38px;margin-bottom:12px;border:1px solid var(--bd)}
-.dg-tool .dg-details{font-size:13px;line-height:1.55;color:var(--mu);margin-top:10px;white-space:pre-wrap}
-.dg-tool .dg-details[hidden]{display:none}
-.dg-report-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-.dg-report-bar button{border:1px solid var(--bd);border-radius:10px;padding:8px 12px;background:var(--card);color:var(--ink);cursor:pointer}
-@media(max-width:1000px){.dg-radar-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.dg-radar-results{grid-template-columns:1fr}}
-</style>
-<script id="dg-final-ux-js">
-(function(){
-const $=s=>document.querySelector(s), $=s=>Array.from(document.querySelectorAll(s));
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const apiBase=(window.DATAGUARD_API_URL||'').replace(/\/$/,'');
-const session=()=>{try{return JSON.parse(localStorage.getItem('dataguard-auth')||'{}')}catch(_){return {}}};
-const token=()=>session().token||'';
-let selectedFiles=[], currentReview=null, radarResults=[], lastPrompt='', activeFilter='Any price', activeDomain='';
+const getToken=()=>{try{return JSON.parse(localStorage.getItem('dataguard-auth')||'{}').token||''}catch(_){return ''}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function msg(text){const n=$('#stt');if(n)n.textContent=text}
-function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
-function cleanName(s){return String(s||'dataguard-project').replace(/[^a-z0-9._-]/gi,'-')}
-function updateStats(r){
- const fs=Array.isArray(r?.findings)?r.findings:[];
- const score=Number(r?.qualityScore??0);
- const nums=$('.bh .ms b');
- if(nums[0])nums[0].textContent=String(selectedFiles.length||r?.fileCount||0);
- if(nums[1])nums[1].textContent=String(fs.length);
- if(nums[2])nums[2].textContent='0';
- $('.bh .tt h3').forEach(n=>n.textContent=fs.length?'Review completed':'Quality gate passed');
- $('.ring b').forEach(n=>n.textContent=String(score));
- $('.ring').forEach(n=>n.style.setProperty('--p',score));
- const count=$('#cnt');if(count)count.textContent='0 of '+fs.length+' applied';
- const sub=$('#fsub');if(sub)sub.textContent=fs.length+' findings from saved review';
- const fixed=$('#fxd');if(fixed)fixed.textContent='0';
+let currentReview=null,chosenFiles=[],radarTools=[],lastRadarPrompt='';
+function note(t){const n=$('#stt');if(n)n.textContent=t}
+function download(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function safeName(s){return String(s||'dataguard-project').replace(/[^a-z0-9._-]/gi,'-')}
+async function loadZip(){if(window.JSZip)return;await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=resolve;s.onerror=()=>reject(new Error('Could not load ZIP support; check your internet connection.'));document.head.append(s)})}
+function resetStats(){
+ $$('.bh .ms b').forEach(n=>n.textContent='0');$$('.ring b').forEach(n=>n.textContent='0');$$('.ring').forEach(n=>n.style.setProperty('--p',0));$$('.scv').forEach(n=>n.textContent='0');
+ $$('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');if($('#fsub'))$('#fsub').textContent='Upload a project to begin';if($('#cnt'))$('#cnt').textContent='0 of 0 applied';if($('#fxd'))$('#fxd').textContent='0';
+ if($('#msgs'))$('#msgs').innerHTML='';if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a ZIP or source files to show real findings here.</div>';
+ const old=$('#dg-review-actions');if(old){old.innerHTML='';old.hidden=true}
 }
-function showReportControls(){
- const old=$('#dg-review-actions');if(old)old.remove();
- const bar=document.createElement('div');bar.className='dg-report-bar';bar.id='dg-review-actions';
- const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;bar.append(b)};
- add('Download report',()=>downloadReport('html'));
- if(selectedFiles.length===1)add('Download file',()=>saveBlob(selectedFiles[0],selectedFiles[0].name));
- if(selectedFiles.length>1)add('Download selected files (ZIP)',async()=>{try{await zipLib();const z=new JSZip();selectedFiles.forEach(f=>z.file(f.webkitRelativePath||f.name,f));saveBlob(await z.generateAsync({type:'blob'}),'dataguard-files.zip')}catch(e){alert(e.message)}});
- add('Download reviewed ZIP',downloadReviewedZip);
- const zone=$('#dg-upload-zone');if(zone)zone.after(bar);
+function stats(r){
+ const findings=Array.isArray(r.findings)?r.findings:[],score=Number(r.qualityScore||0),nums=$$('.bh .ms b');
+ if(nums[0])nums[0].textContent=String(chosenFiles.length||r.fileCount||0);if(nums[1])nums[1].textContent=String(findings.length);if(nums[2])nums[2].textContent='0';
+ if(typeof window.ring==='function')window.ring(score);$$('.bh .tt h3').forEach(n=>n.textContent=findings.length?'Review completed':'Quality gate passed');
+ if($('#fsub'))$('#fsub').textContent=findings.length+' findings from saved review';if($('#cnt'))$('#cnt').textContent='0 of '+findings.length+' applied';if($('#fxd'))$('#fxd').textContent='0';
 }
-function downloadReport(format){
+function reportButtons(){
+ const bar=$('#dg-review-actions');if(!bar)return;bar.innerHTML='';bar.hidden=false;
+ const add=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.type='button';b.onclick=fn;bar.append(b)};
+ add('Download report',()=>downloadReport());
+ if(chosenFiles.length===1)add('Download selected file',()=>download(chosenFiles[0],chosenFiles[0].name));
+ if(chosenFiles.length>1)add('Download selected files (ZIP)',async()=>{try{await loadZip();const z=new JSZip();chosenFiles.forEach(f=>z.file(f.webkitRelativePath||f.name,f));download(await z.generateAsync({type:'blob'}),'dataguard-files.zip')}catch(e){alert(e.message)}});
+ if(currentReview?.id)add('Download reviewed ZIP',downloadReviewedZip);
+}
+function downloadReport(){
  if(!currentReview)return alert('Upload and review a project first.');
- const r=currentReview,fs=Array.isArray(r.findings)?r.findings:[];
- if(format==='json'){saveBlob(new Blob([JSON.stringify({projectName:r.projectName,qualityScore:r.qualityScore,reviewDate:r.reviewDate,fileCount:selectedFiles.length,findings:fs,appliedFixes:0},null,2)],{type:'application/json'}),cleanName(r.projectName)+'-report.json');return}
- const body=fs.map(f=>'<tr><td>'+esc(f.severity)+'</td><td>'+esc(f.title)+'</td><td>'+esc(f.filePath)+'</td><td>'+esc(f.lineNumber)+'</td><td>'+esc(f.evidence||f.recommendation)+'</td></tr>').join('');
- saveBlob(new Blob(['<!doctype html><meta charset="utf-8"><title>DataGuard report</title><style>body{font:15px Arial;max-width:1000px;margin:30px auto;color:#202443}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#eeeaff}</style><h1>DataGuard AI review report</h1><p>Project: '+esc(r.projectName)+' · Score: '+esc(r.qualityScore)+'/100 · Findings: '+fs.length+' · Applied fixes: 0</p><table><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Details</th></tr>'+body+'</table>'],{type:'text/html'}),cleanName(r.projectName)+'-report.html')
+ const r=currentReview,findings=Array.isArray(r.findings)?r.findings:[];
+ const rows=findings.map(f=>'<tr><td>'+esc(f.severity)+'</td><td>'+esc(f.title)+'</td><td>'+esc(f.filePath)+'</td><td>'+esc(f.lineNumber)+'</td><td>'+esc(f.evidence||f.recommendation)+'</td></tr>').join('');
+ const html='<!doctype html><meta charset="utf-8"><title>DataGuard Review Report</title><style>body{font:15px Arial;max-width:1000px;margin:32px auto;color:#202443}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#eeeaff}</style><h1>DataGuard AI — Review Report</h1><p>Project: '+esc(r.projectName)+' · Score: '+esc(r.qualityScore)+'/100 · Findings: '+findings.length+' · Fixes applied: 0</p><table><tr><th>Severity</th><th>Finding</th><th>File</th><th>Line</th><th>Recommendation</th></tr>'+rows+'</table>';
+ download(new Blob([html],{type:'text/html;charset=utf-8'}),safeName(r.projectName)+'-report.html');
 }
-async function zipLib(){if(window.JSZip)return;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=ok;s.onerror=()=>no(new Error('ZIP helper could not load. Check your internet connection.'));document.head.append(s)})}
 async function downloadReviewedZip(){
- if(!currentReview?.id)return alert('No saved review selected.');
- try{const r=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(currentReview.id)+'/download',{headers:{Authorization:'Bearer '+token()}});if(!r.ok)throw new Error(await r.text()||'Download failed.');saveBlob(await r.blob(),cleanName(currentReview.projectName)+'-reviewed.zip')}catch(e){alert('Download failed: '+e.message)}
+ try{const res=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(currentReview.id)+'/download',{headers:{Authorization:'Bearer '+getToken()}});if(!res.ok)throw new Error(await res.text()||'Download failed');download(await res.blob(),safeName(currentReview.projectName)+'-reviewed.zip')}catch(e){alert('Download failed: '+e.message)}
 }
-async function upload(files){
- files=Array.from(files||[]);if(!files.length)return;
- if(files.reduce((a,f)=>a+f.size,0)>25*1024*1024)return alert('Total upload size must be 25 MB or less.');
- if(!token()){window.pending='check';if(window.go)window.go('auth');return}
- selectedFiles=files;msg('Preparing upload…');
+async function uploadFiles(files){
+ files=Array.from(files||[]);if(!files.length)return;if(files.reduce((n,f)=>n+f.size,0)>25*1024*1024)return alert('The total upload must be 25 MB or less.');
+ if(!getToken()){if(typeof window.go==='function'){window.pending='check';window.go('auth')}else alert('Please sign in first.');return}
+ chosenFiles=files;note('Preparing upload…');
  try{
   let zip,name;
   if(files.length===1&&/\.zip$/i.test(files[0].name)){zip=files[0];name=files[0].name}
-  else{await zipLib();const z=new JSZip();files.forEach(f=>z.file(f.webkitRelativePath||f.name,f));zip=await z.generateAsync({type:'blob',compression:'DEFLATE'});name=(files.length===1?files[0].name.replace(/\.[^.]+$/,''):'dataguard-project')+'.zip'}
-  const form=new FormData();form.append('name',name.replace(/\.zip$/i,''));form.append('file',zip,name);
-  msg('Uploading and reviewing…');
-  const res=await fetch(apiBase+'/api/projects/upload',{method:'POST',headers:{Authorization:'Bearer '+token()},body:form});
-  const r=await res.json().catch(()=>({}));if(!res.ok)throw new Error(r.message||r.error||'Review failed ('+res.status+').');
-  currentReview=r;updateStats(r);
-  if(!Array.isArray(r.findings)||!r.findings.length){if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">No findings were returned. No fixes are available.</div>';if($('#msgs'))$('#msgs').innerHTML='';}
-  showReportControls();msg('Review complete · '+(r.findings||[]).length+' findings');
-  if(window.loadHistory)window.loadHistory();
- }catch(e){msg('Upload failed');alert('Upload/review failed: '+e.message)}
+  else{await loadZip();const z=new JSZip();files.forEach(f=>z.file(f.webkitRelativePath||f.name,f));zip=await z.generateAsync({type:'blob',compression:'DEFLATE'});name=(files.length===1?files[0].name.replace(/\.[^.]+$/,''):'dataguard-project')+'.zip'}
+  const form=new FormData();form.append('name',name.replace(/\.zip$/i,''));form.append('file',zip,name);note('Uploading and reviewing…');
+  const res=await fetch(apiBase+'/api/projects/upload',{method:'POST',headers:{Authorization:'Bearer '+getToken()},body:form});
+  const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.message||data.error||'Review failed ('+res.status+').');
+  currentReview=data;stats(data);reportButtons();
+  const fs=Array.isArray(data.findings)?data.findings:[];
+  if(!fs.length){if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">No issues found. There are no fixes to apply.</div>';if($('#msgs'))$('#msgs').innerHTML=''}
+  note('Review complete · '+fs.length+' findings');if(typeof window.loadHistory==='function')window.loadHistory();
+ }catch(e){note('Upload failed');alert('Upload/review failed: '+e.message)}
 }
 function wireUpload(){
- const zone=$('#dg-upload-zone');if(!zone)return;
- const fi=$('#dg-files-input'),zi=$('#dg-zip-input');
- if(fi)fi.onchange=e=>{upload(e.target.files);e.target.value=''};
- if(zi)zi.onchange=e=>{upload(e.target.files);e.target.value=''};
- const pf=$('#dg-pick-files');if(pf)pf.onclick=()=>fi.click();
- const pz=$('#dg-pick-zip');if(pz)pz.onclick=()=>zi.click();
- zone.ondragover=e=>{e.preventDefault();zone.classList.add('drag')};
- zone.ondragleave=()=>zone.classList.remove('drag');
- zone.ondrop=e=>{e.preventDefault();zone.classList.remove('drag');upload(e.dataTransfer.files)};
- // Brand/logo should not navigate to Home when the user is inside code review.
- const brand=$('.side .brand');if(brand)brand.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(window.go)window.go('check');const app=$('#app');if(app)app.dataset.v='check'},true);
- const newScan=$('#nw');if(newScan)newScan.onclick=e=>{e.preventDefault();zi.click()};
+ const zone=$('#dg-upload-zone'),files=$('#dg-files-input'),zip=$('#dg-zip-input');if(!zone||!files||!zip)return;
+ $('#dg-pick-files').onclick=()=>files.click();$('#dg-pick-zip').onclick=()=>zip.click();
+ files.onchange=e=>{uploadFiles(e.target.files);e.target.value=''};zip.onchange=e=>{uploadFiles(e.target.files);e.target.value=''};
+ zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag')});zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');uploadFiles(e.dataTransfer.files)});
+ const brand=$('.side .brand');if(brand)brand.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(typeof window.setDv==='function')window.setDv('check');else if($('#app'))$('#app').dataset.v='check'},true);
+ const nw=$('#nw');if(nw)nw.onclick=e=>{e.preventDefault();zip.click()};
 }
-function resetDemoState(){
- $('.bh .ms b').forEach(n=>n.textContent='0');$('.ring b').forEach(n=>n.textContent='0');$('.ring').forEach(n=>n.style.setProperty('--p',0));
- $('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');
- if($('#fsub'))$('#fsub').textContent='Upload a project to begin';if($('#cnt'))$('#cnt').textContent='0 of 0 applied';if($('#fxd'))$('#fxd').textContent='0';
- if($('#msgs'))$('#msgs').innerHTML='';if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a project to see findings and suggested fixes.</div>';
- const old=$('#dg-review-actions');if(old)old.remove();
- const originalRun=window.run;window.run=()=>$('#dg-zip-input')?.click();
-}
-function normalize(t){
- return {name:String(t.name||t.tool||t.title||'AI tool').replace(/\*\*/g,''),description:String(t.description||t.use||t.primaryUse||t.strengths||'Description not provided.').replace(/\*\*/g,''),price:String(t.price||t.pricing||t.cost||'Pricing not verified'),free:typeof t.free==='boolean'?t.free:/free|open.source|open-source/i.test(String(t.price||t.pricing||'')),url:String(t.url||t.website||t.link||''),category:String(t.category||activeDomain||'General'),icon:String(t.icon||'✦')};
-}
+function currentDomain(){const a=$$('#cats .on').map(n=>n.textContent.trim()).filter(Boolean);return a[0]||''}
+function budget(){return $$('.opts .ch[data-g="b"].on')[0]?.textContent.trim()||'Any price'}
 function parseTools(text){
- const raw=String(text||'').trim().replace(/^\s*```json/i,'').replace(/```\s*$/,'').trim();
- try{const o=JSON.parse(raw);const a=Array.isArray(o)?o:o.tools||o.results||o.items;if(Array.isArray(a))return a.map(normalize)}catch(_){}
- // Never show raw paragraphs/tables as the result UI. If the provider doesn't return JSON,
- // salvage only distinct named tool rows and show a retryable error if parsing fails.
- const seen=new Set(),a=[];
- raw.split(/\n+/).forEach(line=>{const m=line.trim().replace(/^\|/,'').replace(/\|$/,'').match(/^\s*(?:\d+[.)]\s*)?\*{0,2}([^|—–:]{2,55}?)\*{0,2}\s*(?:\||[—–:]\s+)(.{8,})/);if(!m)return;const name=m[1].replace(/\*\*/g,'').trim();if(!name||/^(tool|name|---|:?-+)/i.test(name)||seen.has(name.toLowerCase()))return;seen.add(name.toLowerCase());a.push(normalize({name,description:m[2].split('|')[0].replace(/\*\*/g,'').trim()}))});
- return a;
+ let raw=String(text||'').trim().replace(/^\s*```json/i,'').replace(/```\s*$/,'').trim();
+ try{const o=JSON.parse(raw),a=Array.isArray(o)?o:o.tools||o.results||o.items;if(Array.isArray(a))return a.map(normalizeTool)}catch(_){}
+ const found=[],seen=new Set();raw.split(/\n+/).forEach(line=>{const cells=line.replace(/^\s*\||\|\s*$/g,'').split('|').map(x=>x.trim());if(cells.length<2)return;const name=cells[0].replace(/^\d+[.)]\s*/,'').replace(/\*\*/g,'');if(!name||/^(tool|name|---|:?-+)/i.test(name)||seen.has(name.toLowerCase()))return;seen.add(name.toLowerCase());found.push(normalizeTool({name,description:cells[1],price:cells[2]||'Pricing not verified',url:cells.find(x=>/^https?:/i.test(x))||''}))});
+ return found;
 }
-function domain(){
- const selected=$('#cats button.on, #cats .on').map(n=>n.textContent.trim()).filter(Boolean);
- return selected.length?selected[0]:'';
-}
-function priceFilter(){
- const b=$('.opts .ch[data-g="b"].on')[0];return b?b.textContent.trim():'Any price';
-}
+function normalizeTool(t){const price=String(t.price||t.pricing||t.cost||'Pricing not verified');return {name:String(t.name||t.tool||t.title||'AI tool').replace(/\*\*/g,''),description:String(t.description||t.use||t.primaryUse||t.strengths||'Description unavailable.').replace(/\*\*/g,''),price,free:typeof t.free==='boolean'?t.free:/free|open.source|open-source/i.test(price),url:String(t.url||t.website||t.link||''),category:String(t.category||currentDomain()||'General'),icon:String(t.icon||'✦')}}
 function renderCards(items){
- const out=$('#out');if(!out)return;
- const budget=priceFilter();
- let list=items.filter(t=>{if(/free only/i.test(budget))return t.free;if(/under \$20/i.test(budget))return t.free||/free|\$\s?(?:[0-9]|1[0-9])(?:\.\d+)?\s*(?:\/|per month|monthly)/i.test(t.price);return true});
- list=list.slice(0,9);
- if(!list.length){out.innerHTML='<div class="dg-empty">No tools matched this filter. Try Any price or refine your request.</div>';return}
+ const out=$('#out');if(!out)return;const b=budget();let list=items.filter(t=>/free only/i.test(b)?t.free:/under \$20/i.test(b)?(t.free||/\$\s?(?:[0-9]|1[0-9])(?:\.\d+)?\s*(?:\/|per month|monthly)/i.test(t.price)):true).slice(0,9);
+ if(!list.length){out.innerHTML='<div class="dg-empty">No tools matched this price filter. Try Any price or refine your prompt.</div>';return}
  const grid=document.createElement('div');grid.className='dg-radar-results';
- list.forEach(t=>{
-  const card=document.createElement('article');card.className='dg-tool';
-  const preview=document.createElement('div');preview.className='dg-preview';preview.textContent=t.icon;
-  const head=document.createElement('div');head.className='dg-tool-head';
-  const titleWrap=document.createElement('div');titleWrap.style.minWidth='0';
-  const title=document.createElement('h4');title.textContent=t.name;
-  const price=document.createElement('div');price.className='dg-price';price.textContent=t.price;
-  titleWrap.append(title,price);head.append(titleWrap);
-  const tags=document.createElement('div');tags.className='dg-tags';
-  [t.free?'Free plan':'Paid / freemium',t.category].filter(Boolean).forEach(v=>{const tag=document.createElement('span');tag.className='dg-tag';tag.textContent=v;tags.append(tag)});
-  const details=document.createElement('div');details.className='dg-details';details.hidden=true;details.textContent=t.description;
-  const actions=document.createElement('div');actions.className='dg-tool-actions';
-  const view=document.createElement('button');view.textContent='View details';view.onclick=()=>{details.hidden=!details.hidden;view.textContent=details.hidden?'View details':'Minimize details'};
-  const maximize=document.createElement('button');maximize.textContent='Maximize';maximize.onclick=()=>{card.classList.toggle('dg-expanded');const expanded=card.classList.contains('dg-expanded');details.hidden=!expanded;card.style.gridColumn=expanded?'1 / -1':'';maximize.textContent=expanded?'Minimize':'Maximize'};
-  actions.append(view,maximize);
-  if(/^https?:\/\//i.test(t.url)){const a=document.createElement('a');a.href=t.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Visit tool';actions.append(a)}
-  card.append(preview,head,tags,details,actions);grid.append(card);
- });
+ list.forEach(t=>{const card=document.createElement('article');card.className='dg-tool';const preview=document.createElement('div');preview.className='dg-tool-preview';preview.textContent=t.icon;
+ const h=document.createElement('h4');h.textContent=t.name;const price=document.createElement('div');price.className='dg-tool-price';price.textContent=t.price;
+ const tags=document.createElement('div');tags.className='dg-tool-tags';[t.free?'Free plan':'Paid / freemium',t.category].forEach(v=>{const x=document.createElement('span');x.className='dg-tool-tag';x.textContent=v;tags.append(x)});
+ const desc=document.createElement('div');desc.className='dg-tool-desc';desc.hidden=true;desc.textContent=t.description;
+ const actions=document.createElement('div');actions.className='dg-tool-actions';const details=document.createElement('button');details.textContent='View details';details.onclick=()=>{desc.hidden=!desc.hidden;details.textContent=desc.hidden?'View details':'Minimize details'};
+ const max=document.createElement('button');max.textContent='Maximize';max.onclick=()=>{const yes=card.classList.toggle('expanded');card.style.gridColumn=yes?'1 / -1':'';desc.hidden=!yes;max.textContent=yes?'Minimize':'Maximize'};
+ actions.append(details,max);if(/^https?:\/\//i.test(t.url)){const a=document.createElement('a');a.href=t.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='View tool';actions.append(a)}
+ card.append(preview,h,price,tags,desc,actions);grid.append(card)});
  out.innerHTML='<div class="dg-history-title">AI RADAR RESULTS · '+list.length+' tools</div>';out.append(grid);
 }
-function renderRadarHistory(){
- const host=$('#hl');if(!host)return;
- let sessions=[];try{sessions=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}
- let sec=$('#dg-radar-history');if(sec)sec.remove();sec=document.createElement('div');sec.id='dg-radar-history';sec.innerHTML='<div class="dg-history-title">AI Radar history</div>';
- sessions.slice(0,12).forEach(h=>{const b=document.createElement('button');b.type='button';b.className='dg-tool-action';b.style.display='block';b.style.width='100%';b.style.margin='5px 0';b.textContent=h.prompt||'Radar session';b.onclick=()=>{lastPrompt=h.prompt||'';radarResults=h.items||[];renderCards(radarResults)};sec.append(b)});host.append(sec);
-}
+function saveRadar(prompt,mode,items){let h=[];try{h=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}h.unshift({prompt,mode,items,createdAt:new Date().toISOString()});localStorage.setItem('dg-radar-history',JSON.stringify(h.slice(0,20)));renderHistory()}
+function renderHistory(){const host=$('#hl');if(!host)return;let h=[];try{h=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}let sec=$('#dg-radar-history');if(sec)sec.remove();sec=document.createElement('div');sec.id='dg-radar-history';const title=document.createElement('div');title.className='history-title';title.textContent='AI Radar history';sec.append(title);h.slice(0,10).forEach(x=>{const b=document.createElement('button');b.className='dg-tool-tag';b.style.display='block';b.style.margin='6px 0';b.textContent=x.prompt;b.onclick=()=>{radarTools=x.items||[];renderCards(radarTools)};sec.append(b)});host.append(sec)}
 async function radar(mode,prompt){
- prompt=String(prompt||'').trim();if(!prompt)return $('#fq')?.focus();
- if(!token()){window.pending='radar';if(window.go)window.go('auth');return}
- activeDomain=domain();const budget=priceFilter();
- const promptToApi='Recommend exactly 9 real tools for this request: '+prompt+'. Domain selected: '+(activeDomain||'No domain selected; recommend broadly useful tools across multiple domains')+'. Price filter: '+budget+'. Return ONLY valid JSON in this schema, no markdown or prose: {"tools":[{"name":"official tool name","description":"clear concise details","price":"known plan price or Free / Freemium / Paid; say pricing not verified if uncertain","free":true or false,"category":"category","icon":"one emoji","url":"official https URL"}]}. Include nine distinct tools. Free only means exclude paid-only products. Under $20/month means only free or tools with a known plan under $20/month. Do not invent prices. For domain-specific categories, every recommendation must fit that category.';
- const out=$('#out');out.innerHTML='<div class="dg-empty">Finding nine tools and applying your selected filters…</div>';
- try{
-  const res=await fetch(apiBase+'/api/ai/radar',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({prompt:promptToApi,mode:mode||'find',category:activeDomain||'general'})});
-  const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.message||body.error||'AI Radar request failed ('+res.status+').');
-  const items=parseTools(body.reply||body.response||body.message||'');
-  if(!items.length)throw new Error('AI returned unstructured text instead of tool data. Please retry; raw paragraphs are hidden to keep the results readable.');
-  radarResults=items;lastPrompt=prompt;renderCards(items);
-  let sessions=[];try{sessions=JSON.parse(localStorage.getItem('dg-radar-history')||'[]')}catch(_){}
-  sessions.unshift({id:Date.now(),prompt,mode,items,createdAt:new Date().toISOString()});localStorage.setItem('dg-radar-history',JSON.stringify(sessions.slice(0,20)));renderRadarHistory();
+ prompt=String(prompt||'').trim();if(!prompt)return $('#fq')?.focus();if(!getToken()){if(typeof window.go==='function'){window.pending='radar';window.go('auth')}return}
+ const category=currentDomain(),price=budget(),team=$$('.opts .ch[data-g="t"].on')[0]?.textContent.trim()||'Solo';
+ const request='Recommend exactly nine distinct real AI tools for this request: '+prompt+'. Domain: '+(category||'General-purpose tools useful across multiple domains')+'. Budget: '+price+'. Team: '+team+'. Return ONLY JSON, no markdown or prose, schema {"tools":[{"name":"official tool name","description":"short accurate description","price":"known plan price or Free/Freemium/Paid; if uncertain say Pricing not verified","free":true,"category":"domain","icon":"one emoji","url":"official https URL"}]}. Include exactly 9 tools. Free only excludes paid-only tools. Under $20/mo includes only free or tools with a verified plan under $20/month. Do not invent prices. If a domain is selected, every tool must fit it.';
+ const out=$('#out');out.innerHTML='<div class="dg-empty">Finding nine tools and applying your filters…</div>';
+ try{const res=await fetch(apiBase+'/api/ai/radar',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+getToken()},body:JSON.stringify({prompt:request,mode:mode==='workflow'?'workflow':'find',category:category||'general'})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.message||data.error||'AI Radar request failed ('+res.status+').');
+ const items=parseTools(data.reply||data.response||data.message||'');if(!items.length)throw new Error('The AI response was not structured. Please retry; raw paragraphs are hidden.');radarTools=items;lastRadarPrompt=prompt;renderCards(items);saveRadar(prompt,mode,items)
  }catch(e){out.innerHTML='<div class="dg-empty">'+esc(e.message)+'</div>'}
 }
 function wireRadar(){
- const ff=$('#ff'),fq=$('#fq');if(ff)ff.onclick=()=>radar('find',fq?.value||'');if(fq)fq.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();radar('find',fq.value)}};
- const wf=$('#wf');if(wf)wf.onclick=()=>radar('workflow',$('#wq')?.value||fq?.value||'');
- $('.pl2 button').forEach(b=>b.onclick=()=>radar('find',(fq?.value||'')+' '+b.dataset.x));
- $('.opts .ch').forEach(b=>b.addEventListener('click',()=>{if(radarResults.length)renderCards(radarResults)}));
+ const ff=$('#ff'),fq=$('#fq'),wf=$('#wf');if(ff)ff.onclick=()=>radar('find',fq?.value||'');if(fq)fq.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();radar('find',fq.value)}};if(wf)wf.onclick=()=>radar('workflow',$('#wq')?.value||fq?.value||'');
+ $$('.pl2 button').forEach(b=>b.onclick=()=>radar('find',(fq?.value||'')+' '+b.dataset.x));
+ $$('.opts .ch').forEach(b=>b.addEventListener('click',()=>{if(radarTools.length)renderCards(radarTools)}));
+ $$('#cats button').forEach(b=>b.addEventListener('click',()=>{if(radarTools.length)renderCards(radarTools)}));
+ $$('.seg button[data-m]').forEach(b=>b.onclick=()=>{$$('.seg button[data-m]').forEach(x=>x.classList.toggle('on',x===b));if(b.dataset.m==='flow')$('#pw').hidden=false;else $('#pw').hidden=true});
 }
-wireUpload();wireRadar();resetDemoState();renderRadarHistory();
+wireUpload();wireRadar();resetStats();renderHistory();
 })();
-</script>
-</body></html>';
-   downloadBlob(new Blob([doc],{type:'text/html;charset=utf-8'}),reviewName(r)+'-report.html');
- }
- async function makeZip(files){
-   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-   const zip=new JSZip();files.forEach(f=>zip.file(f.webkitRelativePath||f.name,f));
-   return zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:5}});
- }
- async function uploadFiles(files){
-   files=Array.from(files||[]);if(!files.length)return;
-   const total=files.reduce((n,f)=>n+f.size,0);
-   if(total>25*1024*1024){alert('The selected files exceed the 25 MB total upload limit.');return}
-   if(!auth()){if(typeof window.go==='function'){window.pending='check';window.go('auth')}return}
-   const zone=$('#dg-upload-zone');if(zone)zone.querySelector('.dg-upload-copy').innerHTML='<b>Preparing upload…</b><small>Packaging files securely into a ZIP archive.</small>';
-   try{
-     let zipBlob,zipName;
-     if(files.length===1&&/\.zip$/i.test(files[0].name)){zipBlob=files[0];zipName=files[0].name}
-     else{zipBlob=await makeZip(files);zipName=(files.length===1?files[0].name.replace(/\.[^.]+$/,''):'dataguard-project')+'.zip'}
-     const form=new FormData();form.append('name',zipName.replace(/\.zip$/i,''));form.append('file',zipBlob,zipName);
-     if(zone)zone.querySelector('.dg-upload-copy').innerHTML='<b>Review in progress…</b><small>Uploading and analyzing. Please keep this tab open.</small>';
-     const response=await fetch(apiBase+'/api/projects/upload',{method:'POST',headers:{Authorization:'Bearer '+auth()},body:form});
-     const body=await response.json().catch(()=>({message:'Server returned an unreadable response.'}));
-     if(!response.ok)throw new Error(body.message||body.error||'Upload/review failed ('+response.status+').');
-     latestZipBlob=zipBlob;showReview(body,zipBlob,files);
-     const fileSelect=$('#dg-file-select');if(fileSelect){fileSelect.innerHTML='<option value="">Choose file…</option>';files.forEach(file=>{const option=document.createElement('option');option.value=file.webkitRelativePath||file.name;option.textContent=file.webkitRelativePath||file.name;fileSelect.append(option)})}
-     if(typeof window.bot==='function')window.bot('Review completed. Found '+((body.findings||[]).length)+' findings. Score: '+(body.qualityScore??'—')+'/100.',100);
-     if(typeof window.loadHistory==='function')window.loadHistory();
-   }catch(e){alert('Could not upload/review: '+e.message)}
-   finally{if(zone)zone.querySelector('.dg-upload-copy').innerHTML='<b>Upload a project to review</b><small>Choose ZIP, one or more files, or drag a ZIP/files here. Maximum total size: 25 MB.</small>'}
- }
- const zone=$('#dg-upload-zone');
- if(zone){
-   $('#dg-pick-files').onclick=()=>$('#dg-files-input').click();$('#dg-pick-zip').onclick=()=>$('#dg-zip-input').click();
-   $('#dg-files-input').addEventListener('change',e=>{uploadFiles(e.target.files);e.target.value=''});
-   $('#dg-zip-input').addEventListener('change',e=>{uploadFiles(e.target.files);e.target.value=''});
-   ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag')}));
-   ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag')}));
-   zone.addEventListener('drop',e=>uploadFiles(e.dataTransfer.files));
-   const pick=$('#nw');if(pick)pick.onclick=e=>{e.preventDefault();$('#dg-zip-input').click()};
- }
- $('#dg-report-json').onclick=()=>downloadReport('json');$('#dg-report-html').onclick=()=>downloadReport('html');
- async function downloadOneFile(){
-   if(!latestReview?.id)return alert('Run a code review first.');
-   const path=$('#dg-file-select')?.value;if(!path)return alert('Choose a file first.');
-   try{
-     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-     const res=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(latestReview.id)+'/download',{headers:{Authorization:'Bearer '+auth()}});
-     if(!res.ok)throw new Error((await res.text())||'Download failed ('+res.status+').');
-     const zip=await window.JSZip.loadAsync(await res.blob());const entry=zip.file(path);
-     if(!entry)throw new Error('That file was not present in the downloaded archive.');
-     downloadBlob(await entry.async('blob'),path.split('/').pop()||'download');
-   }catch(e){alert('Could not download file: '+e.message)}
- }
- $('#dg-download-one').onclick=downloadOneFile;
- async function downloadReviewZip(){
-   if(!latestReview?.id)return alert('Select a saved review first.');
-   try{
-     const res=await fetch(apiBase+'/api/projects/reviews/'+encodeURIComponent(latestReview.id)+'/download',{headers:{Authorization:'Bearer '+auth()}});
-     if(!res.ok)throw new Error((await res.text())||'Download failed ('+res.status+').');
-     const blob=await res.blob();latestZipBlob=blob;downloadBlob(blob,reviewName(latestReview)+'-reviewed.zip');
-   }catch(e){alert('Download failed: '+e.message)}
- }
- $('#dg-download-all').onclick=downloadReviewZip;
- // Replace misleading demo counters/messages with an honest empty state until the API returns a review.
- const statEls=$('.bh .ms b');if(statEls.length>=3){statEls[0].textContent='0';statEls[1].textContent='0';statEls[2].textContent='0'}
- if($('#msgs'))$('#msgs').innerHTML='';
- setText('#fsub','Upload a project to begin');setText('#cnt','0 of 0 applied');setText('#fxd','0');
- $('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');
- if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a ZIP or files to see real findings here.</div>';
- const fakeRun=window.run;
- // Selecting a history row should not show made-up score/fixes; the API-backed history remains the source of truth.
- // AI Radar: request structured tool data and render cards, not raw model prose/markdown.
- function currentBudget(){const active=$('.opts .ch[data-g="b"].on')[0];return active?active.textContent.trim():'Any price'}
- function currentCategory(){const active=$('#cats .on')[0];return active?active.textContent.trim():'All categories'}
- function parseToolText(text){
-   let raw=String(text||'').trim();
-   raw=raw.replace(/^\s*```(?:json)?/i,'').replace(/```\s*$/,'').trim();
-   try{const obj=JSON.parse(raw);const arr=Array.isArray(obj)?obj:(obj.tools||obj.results||obj.items||[]);if(arr.length)return arr.map(normalizeTool)}catch(_){}
-   const lines=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean),out=[];
-   for(const line of lines){
-     const clean=line.replace(/^\|?|\|?$/g,'').replace(/^\s*(?:[-*•]|\d+[.)])\s*/,'').replace(/\*\*/g,'').trim();
-     if(!clean||/^[-|:s]+$/.test(clean)||/^(tool|name)\s*\|/i.test(clean)||/^#{1,4}\s/.test(clean))continue;
-     let cells=clean.split('|').map(x=>x.trim()).filter(Boolean);
-     if(cells.length>=2){out.push(normalizeTool({name:cells[0].replace(/^\d+\s*/,''),description:cells[1],price:cells[2]||'',url:cells.find(x=>/^https?:\/\//i.test(x))||''}));continue}
-     const match=clean.match(/^(.{2,60}?)(?:\s*[—–:-]\s+)(.{8,})$/);
-     if(match)out.push(normalizeTool({name:match[1],description:match[2]}));
-   }
-   const seen=new Set();return out.filter(t=>t.name&&!seen.has(t.name.toLowerCase())&&seen.add(t.name.toLowerCase()));
- }
- function normalizeTool(t){
-   const name=String(t.name||t.tool||t.title||'AI tool').replace(/^\*\*|\*\*$/g,'').trim();
-   const description=String(t.description||t.use||t.primaryUse||t.strengths||t.why||'AI-assisted tool for this workflow.').replace(/\*\*/g,'').trim();
-   const price=String(t.price||t.pricing||t.cost||t.plan||'Pricing not verified').trim();
-   const url=String(t.url||t.website||t.link||'').trim();
-   const free=typeof t.free==='boolean'?t.free:/free|open.source|open-source|free tier/i.test(price);
-   return {name,description,price,url,free,category:String(t.category||currentCategory()),icon:String(t.icon||'✦')};
- }
- function freeOnly(){return /free only/i.test(currentBudget())}
- function renderToolCards(items,heading){
-   const out=$('#out');if(!out)return;
-   const filtered=items.filter(t=>!freeOnly()||t.free);
-   const selected=filtered.slice(0,20);
-   if(!selected.length){out.innerHTML='<div class="dg-empty">No tools matched the selected price filter. Try “Any price” or refine your request.</div>';return}
-   const grid=document.createElement('div');grid.className='dg-radar-results';
-   selected.forEach(t=>{
-     const card=document.createElement('article');card.className='dg-tool';
-     const head=document.createElement('div');head.className='dg-tool-head';
-     const ico=document.createElement('div');ico.className='dg-tool-icon';ico.textContent=t.icon||'✦';
-     const meta=document.createElement('div');meta.style.minWidth='0';
-     const title=document.createElement('h4');title.textContent=t.name;
-     const price=document.createElement('div');price.className='dg-price';price.textContent=t.price||'Pricing not verified';
-     meta.append(title,price);head.append(ico,meta);
-     const desc=document.createElement('p');desc.textContent=t.description;
-     const tags=document.createElement('div');tags.className='dg-tags';
-     [t.free?'Free option':'Paid / freemium',t.category].filter(Boolean).forEach(label=>{const tag=document.createElement('span');tag.className='dg-tag';tag.textContent=label;tags.append(tag)});
-     const actions=document.createElement('div');actions.className='dg-tool-actions';
-     if(/^https?:\/\//i.test(t.url)){const a=document.createElement('a');a.href=t.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Visit tool';actions.append(a)}
-     const save=document.createElement('button');save.type='button';save.textContent='Save';save.onclick=()=>{let saved=[];try{saved=JSON.parse(localStorage.getItem('dg-saved-tools')||'[]')}catch(_){}if(!saved.some(x=>x.name===t.name))saved.push(t);localStorage.setItem('dg-saved-tools',JSON.stringify(saved));save.textContent='Saved';};
-     actions.append(save);card.append(head,desc,tags,actions);grid.append(card);
-   });
-   out.innerHTML='<div class="dg-history-title">'+escHtml(heading||'AI RADAR RESULTS')+' · '+selected.length+' tools</div>';out.append(grid);
- }
- function saveRadarSession(prompt,items,mode){
-   const entry={id:Date.now(),prompt,mode,createdAt:new Date().toISOString(),items};
-   radarHistory.unshift(entry);radarHistory=radarHistory.slice(0,30);
-   try{localStorage.setItem('dg-radar-history',JSON.stringify(radarHistory))}catch(_){}
-   renderRadarHistory();
- }
- function renderRadarHistory(){
-   const host=$('#hl');if(!host)return;
-   const old=host.querySelector('.dg-radar-history');if(old)old.remove();
-   const section=document.createElement('div');section.className='dg-radar-history';
-   const title=document.createElement('div');title.className='dg-history-title';title.textContent='AI Radar sessions';section.append(title);
-   if(!radarHistory.length){const empty=document.createElement('div');empty.className='mu';empty.textContent='No Radar sessions yet.';section.append(empty)}
-   radarHistory.slice(0,12).forEach(h=>{const b=document.createElement('button');b.type='button';b.className='dg-tool-action';b.style.display='block';b.style.width='100%';b.style.margin='5px 0';b.style.textAlign='left';b.textContent=(h.prompt||'AI Radar search').slice(0,65);b.onclick=()=>{radarItems=h.items||[];radarQuery=h.prompt||'';if($('#fq'))$('#fq').value=radarQuery;renderToolCards(radarItems,'Saved AI Radar session');};section.append(b)});
-   host.append(section);
- }
- async function radarRequest(mode,prompt){
-   prompt=String(prompt||'').trim();if(!prompt){$('#fq')?.focus();return}
-   if(!auth()){if(typeof window.go==='function'){window.pending='radar';window.go('auth')}return}
-   const budget=currentBudget(),category=currentCategory();
-   const instruction='You are an AI tool discovery assistant. Recommend at least 10 distinct real AI tools matching this user request: '+prompt+'. Category: '+category+'. Budget filter: '+budget+'. Team: '+($('.opts .ch[data-g="t"].on')[0]?.textContent.trim()||'Solo')+'. Return ONLY valid JSON, no markdown, no intro or conclusion, with this schema: {"tools":[{"name":"official product name","description":"one concise sentence about fit for request","price":"specific known plan price or clearly say Free / Freemium / Paid; do not invent exact prices, say verify current pricing if uncertain","free":true or false,"category":"category","icon":"single emoji","url":"official https URL"}]}. Include 10-15 tools. When budget is Free only, include ONLY tools that genuinely have a usable free plan/free tier or are open source; exclude paid-only products. Any price means include free and paid tools and state price status. Under $20/mo means only tools with a known plan under $20/month or free, mark uncertain pricing explicitly and don't falsely claim qualification. Prefer official URLs and be honest if price may change.';
-   const out=$('#out');out.innerHTML='<div class="dg-empty">AI Radar is finding tools and checking the requested price filter…</div>';
-   const radar=$('#rdr');if(radar)radar.classList.add('scan');
-   try{
-     const res=await fetch(apiBase+'/api/ai/radar',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth()},body:JSON.stringify({prompt:instruction,mode:mode||'find',category:category})});
-     const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.message||body.error||'AI Radar request failed ('+res.status+').');
-     const text=body.reply||body.response||body.message||'';let items=parseToolText(text);
-     if(!items.length)throw new Error('The AI response was not structured into tool results. Please try again.');
-     if(freeOnly())items=items.filter(t=>t.free);
-     radarItems=items;radarQuery=prompt;renderToolCards(items,mode==='workflow'?'AI-GENERATED WORKFLOW TOOLS':'AI RADAR RESULTS');saveRadarSession(prompt,items,mode||'find');
-   }catch(e){out.innerHTML='<div class="dg-empty">'+escHtml(e.message)+'</div>'}
-   finally{if(radar)radar.classList.remove('scan')}
- }
- if($('#ff'))$('#ff').onclick=()=>radarRequest('find',$('#fq').value);
- if($('#fq'))$('#fq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();radarRequest('find',$('#fq').value)}});
- if($('#wf'))$('#wf').onclick=()=>radarRequest('workflow',$('#wq')?.value||$('#fq')?.value);
- $('.pl2 button').forEach(b=>b.onclick=()=>radarRequest('find',($('#fq')?.value||'')+' '+b.dataset.x));
- $('.opts .ch').forEach(b=>b.addEventListener('click',()=>{const group=b.dataset.g;$('.opts .ch[data-g="'+group+'"]').forEach(x=>x.classList.toggle('on',x===b));if(radarItems.length)renderToolCards(radarItems,'AI RADAR RESULTS')}));
- renderRadarHistory();
- // Do not render fabricated sample scan data as if it came from the backend.
- if(!latestReview){
-   if($('#dg-review-actions'))$('#dg-review-actions').hidden=true;
-   $('.bh .ms b').forEach(n=>n.textContent='0');
-   setText('#fsub','Upload a project to begin');setText('#cnt','0 of 0 applied');setText('#fxd','0');
-   $('.bh .tt h3').forEach(n=>n.textContent='Waiting for a project review');
-   if($('#fl'))$('#fl').innerHTML='<div class="dg-empty">Upload a ZIP or files to see real findings here.</div>';
-   if($('#msgs'))$('#msgs').innerHTML=''; if(typeof window.ring==='function')window.ring(0); if($('#stt'))$('#stt').textContent='Upload a project to begin';
- }
- // Override fake default scan and reset controls so no demo scores/fixes appear.
- if(typeof window.run==='function')window.run=function(){if($('#dg-zip-input'))$('#dg-zip-input').click()};
-})();
-</script>
-</body>
+</script></body>
 </html>
