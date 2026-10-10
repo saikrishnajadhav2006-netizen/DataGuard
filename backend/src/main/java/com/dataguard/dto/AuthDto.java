@@ -1,5 +1,7 @@
 package com.dataguard.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class AuthDto {
     
     public static class LoginRequest {
@@ -14,6 +16,7 @@ public class AuthDto {
     }
 
     public static class RegisterRequest {
+        @JsonAlias("name")
         private String fullName;
         private String email;
         private String password;
@@ -21,6 +24,7 @@ public class AuthDto {
         public RegisterRequest() {}
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
+        public void setName(String name) { this.fullName = name; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
