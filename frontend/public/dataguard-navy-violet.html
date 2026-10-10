@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DataGuard AI — Navy & Violet Prototype</title>
+<title>DataGuard AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -226,8 +226,8 @@ a.btn{display:inline-block;text-decoration:none}
  
 <!-- AUTH -->
 <section class="view" id="auth"><div class="stage"><div class="lnote" id="lnote" hidden></div><div class="box" id="box">
-<div class="fc su"><h2>Create Account</h2><span class="mu">or use your email to register</span><input placeholder="Full name"><input placeholder="Email"><input type="password" placeholder="Password"><button class="btn" data-login>Sign Up</button><span class="mob" data-sw="0">Have an account? Sign in</span></div>
-<div class="fc si"><h2>Sign In</h2><span class="mu">or use your email account</span><input placeholder="Email"><input type="password" placeholder="Password"><span class="mu">Forgot your password?</span><button class="btn" data-login>Sign In</button><span class="mob" data-sw="1">New here? Create account</span></div>
+<div class="fc su"><h2>Create Account</h2><span class="mu">Create your account with your email</span><input id="dg-register-name" name="fullName" autocomplete="name" maxlength="100" placeholder="Full name"><input id="dg-register-email" name="email" type="email" autocomplete="email" placeholder="Email"><input id="dg-register-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="At least 8 characters"><p id="dg-auth-error-register" class="mu" role="alert"></p><button class="btn" data-login>Sign Up</button><span class="mob" data-sw="0">Have an account? Sign in</span></div>
+<div class="fc si"><h2>Sign In</h2><span class="mu">Sign in with your email and password</span><input id="dg-login-email" name="email" type="email" autocomplete="email" placeholder="Email"><input id="dg-login-password" name="password" type="password" autocomplete="current-password" placeholder="Password"><p id="dg-auth-error-login" class="mu" role="alert"></p><button class="btn" data-login>Sign In</button><span class="mob" data-sw="1">New here? Create account</span></div>
 <div class="oc"><div class="ov"><div class="op ol"><h2>Welcome Back!</h2><p>Log in to keep guarding your code.</p><button class="btn" data-sw="0">Sign In</button></div><div class="op or"><h2>Hello, Developer!</h2><p>Create an account and start reviewing projects today.</p><button class="btn" data-sw="1">Sign Up</button></div></div></div></div></div></section>
  
 <!-- DASHBOARD -->
@@ -391,6 +391,201 @@ $('#mp').onclick=()=>openPers('p');$('#mc').onclick=()=>openPers('c');$('#chs').
 $('#pmx').onclick=$('#pmd').onclick=()=>$('#pm').classList.remove('on');$('#pm').onclick=e=>{if(e.target.id==='pm')$('#pm').classList.remove('on')};
 applyPrefs();
 run();
+</script>
+
+<script>
+/* DataGuard live API bridge: all real auth/reviews/AI requests go through Spring Boot. */
+(function () {
+  const API_BASE = (window.DATAGUARD_API_URL || '').replace(/\/$/, '');
+  const $id = (id) => document.getElementById(id);
+  const token = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}').token || ''; } catch (_) { return ''; } };
+  let activeReviewId = null;
+  const session = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch (_) { return {}; } };
+  async function api(path, options) {
+    options = options || {};
+    const headers = new Headers(options.headers || {});
+    if (!(options.body instanceof FormData) && options.body != null && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    if (token() && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token());
+    const response = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+    const type = response.headers.get('content-type') || '';
+    const body = type.includes('application/json') ? await response.json() : await response.text();
+    if (!response.ok) throw new Error(typeof body === 'string' ? (body || 'Request failed (' + response.status + ')') : body.message || body.error || 'Request failed (' + response.status + ')');
+    return body;
+  }
+  function showError(id, message) { const node = $id(id); if (node) { node.textContent = message || ''; node.style.color = message ? 'var(--bad)' : ''; } }
+  function userFromAuth(auth) { return { n: auth.fullName || auth.name || auth.email, e: auth.email || '', l: 'email' }; }
+  function applySession(auth) {
+    localStorage.setItem('dataguard-auth', JSON.stringify(auth));
+    loggedIn = true; user = userFromAuth(auth); pending = pending || 'check';
+    if (typeof P !== 'undefined') { P.name = user.n; try { localStorage.setItem('dg-prefs', JSON.stringify(P)); } catch (_) {} }
+    if (typeof upd === 'function') upd();
+    const destination = pending || 'check'; pending = null;
+    go(destination);
+  }
+  async function submitAuth(mode) {
+    const register = mode === 'register';
+    const name = register ? ($id('dg-register-name').value || '').trim() : '';
+    const email = ($id(register ? 'dg-register-email' : 'dg-login-email').value || '').trim().toLowerCase();
+    const password = $id(register ? 'dg-register-password' : 'dg-login-password').value || '';
+    const errorId = register ? 'dg-auth-error-register' : 'dg-auth-error-login';
+    showError(errorId, '');
+    if (register && !name) return showError(errorId, 'Enter your full name.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return showError(errorId, 'Enter a valid email address.');
+    if (!password || (register && password.length < 8)) return showError(errorId, register ? 'Use a password with at least 8 characters.' : 'Enter your password.');
+    const buttons = Array.from(document.querySelectorAll(register ? '.fc.su [data-login]' : '.fc.si [data-login]'));
+    buttons.forEach(b => { b.disabled = true; b.dataset.original = b.textContent; b.textContent = register ? 'Creating account…' : 'Signing in…'; });
+    try {
+      const auth = await api('/api/auth/' + (register ? 'register' : 'login'), {
+        method: 'POST',
+        body: JSON.stringify(register ? { fullName: name, email: email, password: password } : { email: email, password: password })
+      });
+      if (!auth || !auth.token) throw new Error('The server did not return a JWT. Please try again.');
+      applySession(auth);
+    } catch (error) {
+      showError(errorId, error.message || 'Authentication failed.');
+    } finally {
+      buttons.forEach(b => { b.disabled = false; b.textContent = b.dataset.original || (register ? 'Sign Up' : 'Sign In'); });
+    }
+  }
+  window.signOutUser = function () {
+    localStorage.removeItem('dataguard-auth'); loggedIn = false; user = null; pending = null;
+    show('home'); if (typeof upd === 'function') upd(); go('home');
+  };
+  window.finish = function () { submitAuth(document.querySelector('#box')?.classList.contains('act') ? 'register' : 'login'); };
+  document.querySelectorAll('.fc.su [data-login]').forEach(b => b.onclick = () => submitAuth('register'));
+  document.querySelectorAll('.fc.si [data-login]').forEach(b => b.onclick = () => submitAuth('login'));
+  document.querySelectorAll('[data-out]').forEach(b => b.onclick = window.signOutUser);
+  if ($id('navReg')) $id('navReg').onclick = () => { $id('box').classList.add('act'); window.go('auth'); };
+  if ($id('navLog')) $id('navLog').onclick = () => { $id('box').classList.remove('act'); window.go('auth'); };
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file'; fileInput.accept = '.zip,application/zip,application/x-zip-compressed'; fileInput.hidden = true; fileInput.id = 'dg-project-upload';
+  document.body.appendChild(fileInput);
+  const originalRun = window.run;
+  clearInterval(tm); msgs.innerHTML = ''; $('#pbi').style.width = '0%'; $('#pc').textContent = '0%'; st('done', token() ? 'Ready · select a ZIP to review' : 'Sign in to begin a review');
+  const fakeApplyAll = $id('aa'); if (fakeApplyAll) fakeApplyAll.hidden = true;
+  const fakePatch = $id('dp'); if (fakePatch) fakePatch.hidden = true;
+  const downloadButton = document.createElement('button'); downloadButton.id = 'dg-download-review'; downloadButton.className = 'pr'; downloadButton.textContent = 'Download reviewed ZIP'; downloadButton.hidden = true; const actionFooter = document.querySelector('.fx .ff'); if (actionFooter) actionFooter.insertBefore(downloadButton, actionFooter.firstChild);
+  downloadButton.onclick = async () => { if (!activeReviewId) return; try { const response = await fetch(API_BASE + '/api/projects/reviews/' + activeReviewId + '/download', { headers: { Authorization: 'Bearer ' + token() } }); if (!response.ok) throw new Error(await response.text() || 'Download failed.'); const blob = await response.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dataguard-reviewed-project.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch (error) { addB('<b>Download failed</b><br>' + esc(error.message)); } };
+  async function loadHistory() {
+    if (!token()) return;
+    try {
+      const reviews = await api('/api/projects/reviews');
+      const list = document.querySelector('.pn');
+      if (!list) return;
+      list.innerHTML = '';
+      const groups = [['Today', []], ['Previous 7 days', []], ['Older', []]];
+      const now = Date.now();
+      reviews.forEach(review => {
+        const days = review.reviewDate ? Math.floor((now - new Date(review.reviewDate).getTime()) / 86400000) : 9;
+        groups[days <= 0 ? 0 : days <= 7 ? 1 : 2][1].push(review);
+      });
+      groups.forEach(([label, items]) => {
+        if (!items.length) return;
+        const heading = document.createElement('div'); heading.className = 'gl'; heading.textContent = label; list.appendChild(heading);
+        items.forEach(review => {
+          const item = document.createElement('a'); item.className = 'hi'; item.href = '#'; item.innerHTML = '<s style="--c:var(--a2)"></s><span></span><em></em>';
+          item.querySelector('span').textContent = review.projectName || 'Project review'; item.querySelector('em').textContent = review.qualityScore == null ? '—' : review.qualityScore;
+          item.onclick = event => { event.preventDefault(); displayReview(review); }; list.appendChild(item);
+        });
+      });
+      if (!reviews.length) { const empty = document.createElement('p'); empty.className = 'mu'; empty.textContent = 'Your saved reviews will appear here.'; list.appendChild(empty); }
+    } catch (error) { console.error('Could not load review history:', error); }
+  }
+  function displayReview(review) {
+    if (!review) return;
+    if (document.querySelector('#tc .pj b')) document.querySelector('#tc .pj b').textContent = review.projectName || 'Project review';
+    if (document.querySelector('#tr .pj b')) document.querySelector('#tr .pj b').textContent = review.projectName || 'Project review';
+    activeReviewId = review.id;
+    if (downloadButton) downloadButton.hidden = false;
+    const score = Number(review.qualityScore || 0); ring(score);
+    st('done', 'Quality checked · ' + score + '/100 · ' + (review.findings || []).length + ' issues');
+    rdy = true; app.classList.add('rdy');
+    const mapped = (review.findings || []).map(f => ({
+      id: f.id, f: f.filePath || 'project', l: f.lineNumber || 1, t: f.title || 'Code quality finding',
+      s: /critical/i.test(f.severity || '') ? 'Critical' : /high|major/i.test(f.severity || '') ? 'Major' : 'Minor',
+      c: /critical|high/i.test(f.severity || '') ? 'var(--bad)' : /medium|major/i.test(f.severity || '') ? 'var(--warn)' : 'var(--a2)',
+      d: [['', f.lineNumber || 1, f.evidence || f.recommendation || 'Review this finding.']]
+    }));
+    F.splice(0, F.length, ...mapped);
+    renderFx(); $('#fsub').textContent = mapped.length + ' findings from saved review'; $('#cnt').textContent = '0 of ' + mapped.length + ' applied';
+    $('#fl').querySelectorAll('.fcd').forEach(card => { const b = card.querySelector('.ap1'); if (b) { b.textContent = 'Request fix suggestion'; b.onclick = async () => {
+      try { const result = await api('/api/projects/reviews/' + review.id + '/findings/' + mapped[Array.from(card.parentNode.children).indexOf(card)].id + '/fix', { method: 'POST' }); addB('<b>Suggested fix</b><br>' + esc(result.description || result.suggestedCode || 'Review the recommendation before applying it.')); }
+      catch (e) { addB('<b>Could not load fix suggestion</b><br>' + esc(e.message)); }
+    }; } });
+  }
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0]; if (!file) return;
+    if (!token()) { pending = 'check'; go('auth'); fileInput.value = ''; return; }
+    if (!file.name.toLowerCase().endsWith('.zip')) { addB('Please select a ZIP archive.'); fileInput.value = ''; return; }
+    st('run', 'Uploading and reviewing ' + file.name + '…'); $('#pbi').style.width = '15%'; $('#pc').textContent = '15%';
+    const form = new FormData(); form.append('name', file.name.replace(/\.zip$/i, '')); form.append('file', file);
+    try {
+      const review = await api('/api/projects/upload', { method: 'POST', body: form });
+      $('#pbi').style.width = '100%'; $('#pc').textContent = '100%';
+      displayReview(review); bot('Review completed by the backend. Found ' + (review.findings || []).length + ' findings. Score: ' + (review.qualityScore ?? 'not available') + '/100.');
+      loadHistory();
+    } catch (error) {
+      st('done', 'Review failed'); bot('<b>Could not review this project</b><br>' + esc(error.message || 'The server could not process the ZIP.'));
+    } finally { fileInput.value = ''; }
+  });
+  function chooseProject() { if (!token()) { pending = 'check'; go('auth'); return; } fileInput.click(); }
+  $('#nw').onclick = chooseProject;
+  window.run = chooseProject;
+  document.querySelectorAll('[data-pg="check"]').forEach(b => b.addEventListener('click', () => { if (token()) setTimeout(() => fileInput.click(), 80); }));
+  window.go = function (page) {
+    if (['check', 'radar'].includes(page) && !token()) {
+      pending = page; const note = $id('lnote'); if (note) { note.hidden = false; note.textContent = 'Please sign in to continue. Your destination will open after login.'; }
+      page = 'auth';
+    } else if (page === 'home') pending = null;
+    if (['check', 'radar'].includes(page)) { show('dash'); setDv(page); if (page === 'check' && token()) loadHistory(); }
+    else show(page);
+    document.querySelectorAll('.pg').forEach(b => b.classList.toggle('on', b.dataset.pg === page));
+    if (page === 'auth' && $id('box')) { /* preserve the user's Sign In / Sign Up selection */ }
+  };
+  const oldSend = window.send;
+  window.send = async function (text) {
+    text = (text || $('#q').value || '').trim(); if (!text) return;
+    $('#q').value = ''; addU(text);
+    if (!token()) { addB('Please sign in to use the AI assistant.'); pending = 'check'; go('auth'); return; }
+    try {
+      const result = await api('/api/ai/chat', { method: 'POST', body: JSON.stringify({ message: text }) });
+      addB(esc(result.reply || result.response || result.message || 'The AI returned an empty response.'));
+    } catch (error) { addB('<b>AI request failed</b><br>' + esc(error.message || 'Check the backend AI configuration.')); }
+  };
+  $('#sd').onclick = () => window.send();
+  $('#q').onkeydown = event => { if (event.key === 'Enter') window.send(); };
+  const originalCards = window.cards;
+  window.cards = async function (label) {
+    const prompt = ($('#fq').value || '').trim() || label;
+    if (!token()) { addB('Please sign in to use AI Radar.'); pending = 'radar'; go('auth'); return; }
+    $('#out').textContent = 'Finding tools with AI…';
+    try {
+      const result = await api('/api/ai/radar', { method: 'POST', body: JSON.stringify({ prompt: prompt, mode: 'find', category: document.querySelector('#cats .on')?.textContent || '' }) });
+      const panel = document.createElement('div'); panel.className = 'res';
+      const heading = document.createElement('h4'); heading.textContent = 'AI Radar results'; panel.appendChild(heading);
+      const text = document.createElement('p'); text.style.whiteSpace = 'pre-wrap'; text.textContent = result.reply || result.response || result.message || 'No results were returned.'; panel.appendChild(text);
+      $('#out').replaceChildren(panel);
+    } catch (error) { $('#out').textContent = 'AI Radar could not load results: ' + error.message; }
+  };
+  window.flow0 = async function () {
+    const prompt = ($('#wq').value || '').trim(); if (!prompt) return;
+    if (!token()) { pending = 'radar'; go('auth'); return; }
+    $('#out').textContent = 'Building your workflow with AI…';
+    try {
+      const result = await api('/api/ai/radar', { method: 'POST', body: JSON.stringify({ prompt: prompt, mode: 'workflow' }) });
+      const panel = document.createElement('div'); panel.className = 'res';
+      const heading = document.createElement('h4'); heading.textContent = 'AI-generated workflow'; panel.appendChild(heading);
+      const text = document.createElement('p'); text.style.whiteSpace = 'pre-wrap'; text.textContent = result.reply || result.response || result.message || 'No workflow was returned.'; panel.appendChild(text);
+      $('#out').replaceChildren(panel);
+    } catch (error) { $('#out').textContent = 'Workflow generation failed: ' + error.message; }
+  };
+  if (token()) {
+    const auth = session(); loggedIn = true; user = userFromAuth(auth);
+    if (typeof upd === 'function') upd();
+  } else { loggedIn = false; user = null; }
+  document.querySelectorAll('[data-pg="home"], .logo, .brand').forEach(el => { el.style.cursor = 'pointer'; el.addEventListener('click', () => window.go('home')); });
+  loadHistory();
+})();
 </script>
 </body>
 </html>
