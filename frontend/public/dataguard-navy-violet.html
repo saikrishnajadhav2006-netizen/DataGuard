@@ -154,22 +154,28 @@ a.btn{display:inline-block;text-decoration:none}
 .seg2{display:flex;gap:6px}.seg2 button{flex:1;border:1px solid var(--bd);background:var(--card);color:var(--ink);padding:9px;border-radius:12px;font:600 13px 'Inter';cursor:pointer}.seg2 button.on{background:var(--ag);color:var(--onb);border-color:transparent}
 .rowt{display:flex;align-items:center;justify-content:space-between;margin-top:18px;font-size:14px}.tg2{width:42px;height:24px;border-radius:99px;background:var(--bd);position:relative;cursor:pointer;transition:.2s}.tg2:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.tg2.on{background:var(--a)}.tg2.on:after{left:21px}
 
-/* Auth layout repair: keep one form visible in the right panel and avoid overlap. */
-.box .fc { left: 50%; width: 50%; padding: 34px clamp(20px, 3vw, 44px); gap: 14px; }
+/* Stable two-column auth layout: forms stay visible beside the purple panel. */
+.box .fc { left: 50%; width: 50%; padding: 32px clamp(20px, 3vw, 42px); gap: 14px; }
 .box .fc.si { opacity: 1; z-index: 3; transform: none; pointer-events: auto; }
-.box .fc.su { opacity: 0; z-index: 1; transform: translateX(16px); pointer-events: none; }
-.box.act .fc.si { opacity: 0; z-index: 1; transform: translateX(16px); pointer-events: none; }
+.box .fc.su { opacity: 0; z-index: 2; transform: none; pointer-events: none; }
+.box.act .fc.si { opacity: 0; z-index: 2; transform: none; pointer-events: none; }
 .box.act .fc.su { opacity: 1; z-index: 3; transform: none; pointer-events: auto; }
 .box .fc h2 { margin: 0 0 6px; line-height: 1.2; }
 .box .fc input { width: 100%; min-height: 48px; flex: none; }
 .box .fc .btn { min-width: 132px; min-height: 48px; margin-top: 4px; }
 .box .fc .mu { line-height: 1.45; text-align: center; }
+.box .oc { left: 0; width: 50%; border-radius: 120px 0 0 120px; z-index: 4; transform: none; }
+.box.act .oc { transform: none; border-radius: 120px 0 0 120px; }
+.box .ov { left: 0; width: 200%; transform: none; }
+.box.act .ov { transform: translateX(-50%); }
+.box .ol { left: 0; right: auto; transform: none; }
+.box .or { left: 50%; right: auto; transform: none; }
 @media (max-width: 900px) {
   .stage { min-height: 0; padding: 28px 16px; }
-  .box { height: auto; min-height: 0; padding: 18px 0; }
+  .box { height: auto; min-height: 0; padding: 0; }
   .box .fc, .box .fc.si, .box .fc.su {
-    position: relative; left: auto; width: 100%; padding: 24px;
-    transform: none !important; opacity: 1; pointer-events: auto;
+    position: relative; top: auto; left: auto; width: 100%; height: auto;
+    padding: 28px 24px; transform: none !important; transition: none;
   }
   .box .fc.si { display: flex; }
   .box .fc.su { display: none; }
@@ -284,7 +290,9 @@ function upd(){if($('#who'))$('#who').textContent=loggedIn?'🔒 Logged in (tap 
 function go(p){if(['check','radar'].includes(p)&&!loggedIn){pending=p;$('#lnote').hidden=false;$('#lnote').textContent=p==='radar'?'Please sign in to use AI Radar. We will take you there right after.':'Please sign in to upload and check your project.';p='auth'}else if(p==='home'){pending=null}else if(p==='auth'&&!pending){$('#lnote').hidden=true}
 if(['check','radar'].includes(p)){show('dash');setDv(p)}else show(p);$$('.pg').forEach(b=>b.classList.toggle('on',b.dataset.pg===p))}
 function setDv(v){app.dataset.v=v;$$('[data-dv]').forEach(a=>a.classList.toggle('on',a.dataset.dv===v));$$('.pg').forEach(b=>b.classList.toggle('on',b.dataset.pg===v));$('#rp').classList.remove('on')}
-$$('[data-pg]').forEach(b=>b.onclick=()=>go(b.dataset.pg));
+$('[data-pg]').forEach(b=>b.onclick=()=>go(b.dataset.pg));
+$('#navLog').onclick=()=>{ $('#box').classList.remove('act'); go('auth'); };
+$('#navReg').onclick=()=>{ $('#box').classList.add('act'); go('auth'); };
 $$('[data-login]').forEach(b=>b.onclick=()=>finish('email'));$$('[data-prov]').forEach(b=>b.onclick=()=>signIn(b.dataset.prov,b));
 $$('[data-out]').forEach(b=>b.onclick=signOutUser);if($('#who'))$('#who').onclick=()=>{if(loggedIn)signOutUser()};$$('[data-dv]').forEach(a=>a.onclick=()=>setDv(a.dataset.dv));
 $$('.pal').forEach(b=>b.onclick=()=>{B.dataset.pal=b.dataset.p;$$('.pal').forEach(x=>x.classList.toggle('on',x===b))});
