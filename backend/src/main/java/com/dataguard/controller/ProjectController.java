@@ -79,6 +79,17 @@ public class ProjectController {
         return userRepository.save(user);
     }
 
+    @GetMapping("/reviews")
+    public ResponseEntity<?> listReviews(Authentication authentication) {
+        String email = authenticationEmail(authentication);
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) return ResponseEntity.status(401).body("Please sign in again.");
+        var reviews = reviewRepository.findAllForUser(user.getId()).stream()
+                .map(review -> ReviewResponse.from(review, findingRepository.findByReviewId(review.getId())))
+                .toList();
+        return ResponseEntity.ok(reviews);
+    }
+
     @GetMapping("/reviews/{reviewId}/download")
     public ResponseEntity<?> downloadReviewedProject(@PathVariable Long reviewId, Authentication authentication) {
         var review = reviewRepository.findById(reviewId).orElse(null);
