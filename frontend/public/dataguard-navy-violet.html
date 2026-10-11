@@ -567,7 +567,7 @@ run();
   document.querySelectorAll('.fc.su [data-login]').forEach(b => b.onclick = () => submitAuth('register'));
   document.querySelectorAll('.fc.si [data-login]').forEach(b => b.onclick = () => submitAuth('login'));
   document.querySelectorAll('[data-out]').forEach(b => b.onclick = window.signOutUser);
-  if ($id('navReg')) $id('navReg').onclick = () => { $id('box').classList.add('act'); window.go('auth'); };
+  if ($id('navReg')) $id('navReg').onclick = () => { if (token()) { window.go('check'); return; } $id('box').classList.add('act'); window.go('auth'); };
   if ($id('navLog')) $id('navLog').onclick = () => { $id('box').classList.remove('act'); window.go('auth'); };
   const fileInput = document.createElement('input');
   fileInput.type = 'file'; fileInput.accept = '.zip,application/zip,application/x-zip-compressed'; fileInput.hidden = true; fileInput.id = 'dg-project-upload';
