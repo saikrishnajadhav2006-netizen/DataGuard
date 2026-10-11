@@ -17,7 +17,7 @@
       var url = new URL(configured, window.location.origin);
       if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
       if (url.username || url.password) return;
-      window.DATAGUARD_API_URL = url.origin + url.pathname.replace(/\\/+$/, '');
+      var apiPath = url.pathname; while (apiPath.length > 1 && apiPath.endsWith('/')) apiPath = apiPath.slice(0, -1); window.DATAGUARD_API_URL = url.origin + (apiPath === '/' ? '' : apiPath);
     } catch (_) {
       console.error('DataGuard API URL is invalid. Check VITE_API_URL.');
     }
