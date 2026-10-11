@@ -40,3 +40,6 @@ jobs:
       - name: Check AI Radar browser script syntax
         working-directory: frontend
         run: node --check public/dataguard-ai-radar.js
+      - name: Check standalone dashboard inline scripts and auth wiring
+        working-directory: frontend
+        run: node scripts/check-inline-scripts.mjs
