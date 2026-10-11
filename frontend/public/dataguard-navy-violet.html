@@ -5,16 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DataGuard AI</title>
 <script>
-  // The React shell passes the deployment API URL into this standalone page.
-  // Local development leaves apiBase unset and uses the Vite /api proxy.
+  // Reuse the build-time API base from the same-origin React shell. When absent,
+  // local development uses Vite's /api proxy; no user-controlled URL is accepted.
   (function () {
-    var configured = new URLSearchParams(window.location.search).get('apiBase');
+    var configured = window.DATAGUARD_API_URL || '';
+    if (!configured && window.parent !== window) {
+      try { configured = window.parent.DATAGUARD_API_URL || ''; } catch (_) {}
+    }
     if (!configured) return;
     try {
-      var url = new URL(configured);
+      var url = new URL(configured, window.location.origin);
       if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
       if (url.username || url.password) return;
-      window.DATAGUARD_API_URL = url.origin + url.pathname.replace(/\/+$/, '');
+      window.DATAGUARD_API_URL = url.origin + url.pathname.replace(/\\/+$/, '');
     } catch (_) {
       console.error('DataGuard API URL is invalid. Check VITE_API_URL.');
     }
