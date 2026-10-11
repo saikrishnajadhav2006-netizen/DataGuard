@@ -19,7 +19,7 @@ for (const item of inlineScripts) {
 if (!html.includes("$$('.thm').forEach(b=>b.onclick=mode)")) {
   throw new Error('Theme buttons must use the multi-element selector; otherwise page initialization can stop.');
 }
-if (html.includes("$('.thm').forEach")) {
+if (/(?<!\$)\$\(['"]\.thm['"]\)\.forEach/.test(html)) {
   throw new Error('Found a single-element selector incorrectly used with forEach for theme buttons.');
 }
 if (!html.includes('window.parent.DATAGUARD_API_URL')) {
