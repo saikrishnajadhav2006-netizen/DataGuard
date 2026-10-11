@@ -380,7 +380,7 @@ $$('[data-login]').forEach(b=>b.onclick=()=>finish('email'));$$('[data-prov]').f
 $$('[data-out]').forEach(b=>b.onclick=signOutUser);if($('#who'))$('#who').onclick=()=>{if(loggedIn)signOutUser()};$$('[data-dv]').forEach(a=>a.onclick=()=>setDv(a.dataset.dv));
 $$('.pal').forEach(b=>b.onclick=()=>{B.dataset.pal=b.dataset.p;$$('.pal').forEach(x=>x.classList.toggle('on',x===b))});
 function applyMode(m){B.dataset.mode=m;$$('.thm use').forEach(u=>u.setAttribute('href',m==='dark'?'#sun':'#moon'));try{localStorage.setItem('dg-mode',m)}catch(e){}}
-function mode(){applyMode(B.dataset.mode==='dark'?'light':'dark')}window.setDataGuardTheme=applyMode;window.toggleDataGuardTheme=mode;$('.thm').forEach(b=>b.onclick=mode);$('#dm').onclick=mode;try{const m=localStorage.getItem('dg-mode');if(m)applyMode(m)}catch(e){}
+function mode(){applyMode(B.dataset.mode==='dark'?'light':'dark')}window.setDataGuardTheme=applyMode;window.toggleDataGuardTheme=mode;$$('.thm').forEach(b=>b.onclick=mode);$('#dm').onclick=mode;try{const m=localStorage.getItem('dg-mode');if(m)applyMode(m)}catch(e){}
 $$('[data-sw]').forEach(b=>b.onclick=()=>$('#box').classList.toggle('act',b.dataset.sw==='1'));
 $$('.tg').forEach(b=>b.onclick=()=>app.classList.toggle('sbc'));$('#cl').onclick=()=>app.classList.toggle('sbc');$('#ft').onclick=()=>app.classList.toggle('fxo');$('#fcl').onclick=()=>app.classList.remove('fxo');
 if(innerWidth<900)app.classList.add('sbc');
