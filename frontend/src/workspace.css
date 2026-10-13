@@ -228,3 +228,43 @@
  .dg-review-page>.dg-review-chat-inline{flex:1 0 360px;min-height:360px}
  .dg-review-chat-inline>.dg-chat-messages{min-height:220px}
 }
+
+
+/* Code Check: one unified history and a single assistant-driven review flow. */
+.dg-unified-history{display:flex;flex-direction:column;gap:3px;overflow-y:auto;min-height:0;flex:1;margin-top:10px}
+.dg-unified-history-item{display:flex;align-items:center;gap:4px;padding:2px;border-radius:11px;min-width:0}
+.dg-unified-history-item:hover,.dg-unified-history-item.active{background:#e7e0ff}
+.dg-unified-history-open{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;min-width:0;width:100%;padding:10px 8px;border:0;border-radius:9px;background:transparent;color:var(--ink);text-align:left}
+.dg-unified-history-open>span{display:grid;gap:5px;min-width:0}
+.dg-unified-history-open strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700}
+.dg-unified-history-open small{display:block;color:var(--muted);font-size:11px}
+.dg-unified-history-open>b{flex:none;background:#d8eee8;color:#138264;border-radius:20px;padding:3px 8px;font-size:11px}
+.dg-unified-history-item .dg-delete-history{opacity:0;pointer-events:none}
+.dg-unified-history-item:hover .dg-delete-history,.dg-unified-history-item:focus-within .dg-delete-history{opacity:1;pointer-events:auto}
+.dg-dark .dg-unified-history-item:hover,.dg-dark .dg-unified-history-item.active{background:#3b3266}
+.dg-dark .dg-unified-history-open{color:var(--ink)}
+.dg-dark .dg-unified-history-open>b{background:#164e3b;color:#a7f3d0}
+
+/* Metrics stay at the top; findings and conversation flow naturally below. */
+.dg-review-page{height:auto!important;min-height:0!important;overflow:visible!important;display:block!important;max-width:none;padding:24px clamp(14px,2.3vw,34px) 42px}
+.dg-review-page>.dg-project-banner{margin-bottom:16px}
+.dg-review-page>.dg-metrics{margin:0 0 20px}
+.dg-review-page>.dg-findings-capsule{max-height:none;overflow:visible;margin:0 0 18px}
+.dg-review-page>.dg-findings-capsule[open]{overflow:visible}
+.dg-findings-capsule .dg-findings{max-height:none;overflow:visible}
+.dg-review-page>.dg-review-chat-inline{display:block!important;min-height:0!important;height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.dg-review-chat-inline>.dg-chat-messages{display:block;max-height:none!important;min-height:0!important;overflow:visible!important;padding:4px 0 8px!important;scroll-behavior:auto}
+.dg-review-chat-inline .dg-chat-empty{margin:8px 0 12px;padding:0 2px;font-size:13px}
+.dg-review-chat-inline .dg-message{max-width:min(92%,900px);margin:10px 0;padding:13px 16px}
+.dg-review-chat-inline .dg-chat-form{position:sticky;bottom:10px;z-index:3;display:flex;align-items:center;gap:8px;margin:8px 0 4px;padding:5px 7px 5px 14px;border:1px solid var(--line);border-radius:14px!important;background:var(--panel)!important;box-shadow:0 8px 24px #21164212}
+.dg-review-chat-inline .dg-chat-form input{min-height:34px;padding:8px 2px;background:transparent;color:var(--ink)}
+.dg-review-chat-inline .dg-chat-form button{width:36px;height:36px;flex:none;border-radius:10px;background:#7653f6!important}
+.dg-dark .dg-review-chat-inline .dg-chat-form{border-color:#51456f;background:#211b38!important}
+.dg-dark .dg-review-chat-inline .dg-message{background:#30264e;color:#f2efff}
+.dg-dark .dg-review-chat-inline .dg-message.user{background:#3b3266}
+@media(max-width:760px){
+ .dg-review-page{height:auto!important;min-height:0!important;overflow:visible!important;padding:16px 12px 28px}
+ .dg-review-page>.dg-review-chat-inline{min-height:0!important;flex:none}
+ .dg-review-chat-inline>.dg-chat-messages{min-height:0!important;max-height:none!important}
+ .dg-unified-history{max-height:220px}
+}
