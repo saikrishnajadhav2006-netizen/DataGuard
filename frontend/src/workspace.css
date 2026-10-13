@@ -82,3 +82,24 @@
 .dg-modal-actions button:hover:not(:disabled),.dg-score-modal-footer .dg-primary:hover:not(:disabled){filter:brightness(.96)}
 .dg-dark .dg-fix-button:hover:not(:disabled),.dg-dark .dg-outline:hover:not(:disabled){background:#47366f;border-color:#a18bff;color:#f4efff}
 @media(max-width:560px){.dg-score-modal-hint{padding:0 17px 14px}}
+
+
+/* Expired uploaded source: make the recovery action visibly clickable. */
+.dg-alert-upload{display:inline-flex!important;align-items:center;gap:6px;flex:none;padding:3px 5px!important;border:0!important;border-radius:4px!important;background:transparent!important;color:inherit!important;text-decoration:underline;text-underline-offset:3px;font-weight:800;cursor:pointer;}
+.dg-alert-upload:hover{background:#ffffff16!important;color:#fff!important;}
+.dg-chat-heading{gap:8px;}
+.dg-chat-expand{flex:1;min-width:0;width:auto;}
+.dg-chat-heading-actions{display:flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border:1px solid var(--line);border-radius:10px;background:#211b38;color:#e8e0ff;}
+.dg-delete-current-chat{display:grid;place-items:center;flex:none;width:36px;height:36px;border:1px solid #694454;border-radius:10px;background:#3a202e;color:#ffb9c3;cursor:pointer;}
+.dg-delete-current-chat:hover{background:#b52f48;color:#fff;border-color:#d94760;}
+.dg-chat-form button{background:#211b38!important;color:#fff!important;border:1px solid #51456f!important;box-shadow:0 5px 14px #100b2530;}
+.dg-chat-form button:hover:not(:disabled){background:#4a347c!important;border-color:#8b70dd!important;color:#fff!important;}
+.dg-assistant-icon{background:#211b38!important;color:#c8b8ff!important;border:1px solid #51456f;box-shadow:0 5px 14px #100b2525;}
+.dg-dark .dg-assistant-icon{background:#17132b!important;color:#d8ccff!important;border-color:#51456f;}
+.dg-tool-logo{position:relative;background:linear-gradient(145deg,#f1edff,#e3dcff);border:1px solid #d9ceff;box-shadow:inset 0 1px 0 #fff,0 4px 12px #5d46a815;}
+.dg-tool-logo .dg-tool-fallback{position:absolute;color:#7152df;stroke-width:1.9;}
+.dg-tool-logo img{position:relative;z-index:1;width:26px;height:26px;object-fit:contain;border-radius:7px;background:#fff;padding:2px;}
+.dg-dark .dg-tool-logo{background:linear-gradient(145deg,#33295b,#292143);border-color:#4d407b;box-shadow:inset 0 1px 0 #ffffff0a,0 5px 14px #00000018;}
+.dg-dark .dg-tool-logo .dg-tool-fallback{color:#c3b1ff;}
+.dg-dark .dg-chat-heading-actions{background:#17132b;color:#e8e0ff;border-color:#51456f;}
+@media(max-width:560px){.dg-chat-heading{padding:12px;}.dg-chat-heading-copy{gap:9px}.dg-chat-heading-copy small{max-width:190px;}.dg-chat-heading-actions{width:30px;height:30px;}.dg-delete-current-chat{width:32px;height:32px;}}
