@@ -28,9 +28,22 @@ public class SyntaxAnalyzer {
             "__pycache__", ".venv", "venv", "coverage");
     private static final String PARSER_SCRIPT = """
             import json, os, sys
-            from tree_sitter_language_pack import get_parser, detect_language_from_path
+            from tree_sitter_language_pack import get_parser
 
             root = os.path.abspath(sys.argv[1])
+            extensions = {
+              ".java":"java", ".js":"javascript", ".jsx":"javascript", ".mjs":"javascript",
+              ".cjs":"javascript", ".ts":"typescript", ".tsx":"tsx", ".py":"python",
+              ".go":"go", ".rs":"rust", ".c":"c", ".h":"c", ".cc":"cpp", ".cpp":"cpp",
+              ".cxx":"cpp", ".hpp":"cpp", ".cs":"c_sharp", ".php":"php", ".rb":"ruby",
+              ".swift":"swift", ".kt":"kotlin", ".kts":"kotlin", ".scala":"scala",
+              ".sh":"bash", ".bash":"bash", ".sql":"sql", ".html":"html", ".htm":"html",
+              ".css":"css", ".scss":"scss", ".vue":"vue", ".svelte":"svelte",
+              ".json":"json", ".yaml":"yaml", ".yml":"yaml", ".toml":"toml",
+              ".xml":"xml", ".md":"markdown", ".lua":"lua", ".dart":"dart",
+              ".ex":"elixir", ".exs":"elixir", ".erl":"erlang", ".hs":"haskell",
+              ".pl":"perl", ".r":"r", ".jl":"julia", ".m":"objc", ".mm":"objc"
+            }
             ignored = {".git", "node_modules", "target", "build", "dist", ".next",
                        "vendor", "__pycache__", ".venv", "venv", "coverage"}
             results = []
@@ -40,10 +53,11 @@ public class SyntaxAnalyzer {
             for current, dirs, files in os.walk(root):
                 dirs[:] = [d for d in dirs if d not in ignored]
                 for name in files:
-                    path = os.path.join(current, name)
-                    language = detect_language_from_path(path)
+                    ext = os.path.splitext(name)[1].lower()
+                    language = extensions.get(ext)
                     if not language:
                         continue
+                    path = os.path.join(current, name)
                     try:
                         if os.path.getsize(path) > max_bytes:
                             continue
