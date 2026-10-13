@@ -77,14 +77,11 @@ public class ReviewEngine {
         }
         List<Finding> findings = new ArrayList<>(unique.values());
 
-        int score = 100;
-        for (Finding finding : findings) {
-            if ("CRITICAL".equalsIgnoreCase(finding.getSeverity())) score -= 15;
-            else if ("HIGH".equalsIgnoreCase(finding.getSeverity())) score -= 10;
-            else if ("MEDIUM".equalsIgnoreCase(finding.getSeverity())) score -= 5;
-            else score -= 2;
-        }
-        return new AnalysisResult(List.copyOf(findings), Math.max(0, score));
+        // Use one point per finding so every resolved finding visibly improves the score.
+        // The previous severity deductions could exceed 100 and clamp the score at zero,
+        // making successful fixes appear to have no effect.
+        int score = Math.max(1, 100 - Math.min(99, findings.size()));
+        return new AnalysisResult(List.copyOf(findings), score);
     }
 
     private String normalize(String value) {
