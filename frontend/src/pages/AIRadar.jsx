@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, AudioLines, Bot, BookOpen, BrainCircuit, Check, ChevronDown, Code2, Compass, Database, ExternalLink, GitBranch, Headphones, Image, LoaderCircle, LogOut, Megaphone, Moon, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Radar, RefreshCw, Search, Send, Settings2, ShieldCheck, Sparkles, TrendingUp, Video, Workflow, X, Zap } from 'lucide-react';
+import { ArrowRight, AudioLines, Bot, BookOpen, BrainCircuit, Check, ChevronDown, Code2, Compass, Database, ExternalLink, GitBranch, Headphones, Image, LoaderCircle, LogOut, Megaphone, Moon, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Radar, RefreshCw, Search, Send, Settings2, ShieldCheck, Sparkles, TrendingUp, Trash2, Video, Workflow, X, Zap } from 'lucide-react';
 import { createChatSession, deleteChatSession, getChatHistory, getChatSessions, sendChatMessage, sendRadarPrompt } from '../lib/api';
 import useAppTheme from '../lib/useAppTheme';
 import '../workspace.css';
