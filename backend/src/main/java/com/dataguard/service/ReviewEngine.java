@@ -1,9 +1,6 @@
 package com.dataguard.service;
 
-import com.dataguard.analyzer.ArchitectureAnalyzer;
-import com.dataguard.analyzer.CodeQualityAnalyzer;
-import com.dataguard.analyzer.SecurityAnalyzer;
-import com.dataguard.analyzer.SemgrepAnalyzer;
+import com.dataguard.agent.ReviewAgent;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Project;
 import com.dataguard.entity.Review;
@@ -19,10 +16,7 @@ import java.util.List;
 public class ReviewEngine {
     private final ReviewRepository reviewRepository;
     private final FindingRepository findingRepository;
-    private final CodeQualityAnalyzer codeQualityAnalyzer;
-    private final SecurityAnalyzer securityAnalyzer;
-    private final SemgrepAnalyzer semgrepAnalyzer;
-    private final ArchitectureAnalyzer architectureAnalyzer;
+    private final List<ReviewAgent> reviewAgents;
     private final AIService aiService;
 
     public Review runReview(Project project, File extractedProjectDir) {
@@ -31,13 +25,15 @@ public class ReviewEngine {
         review.setQualityScore(100);
         review = reviewRepository.save(review);
 
-        // These are deterministic local checks. Their results, not placeholder
-        // dashboard numbers, are persisted and returned to the frontend.
+        // All entry points (ZIP uploads and future GitHub events) share this pipeline.
+        // Semgrep is executed inside SecurityAgent; it is not a separate agent.
         List<Finding> findings = new ArrayList<>();
-        findings.addAll(codeQualityAnalyzer.analyze(extractedProjectDir, review));
-        findings.addAll(securityAnalyzer.analyze(extractedProjectDir, review));
-        findings.addAll(architectureAnalyzer.analyze(extractedProjectDir, review));
-        findings.addAll(semgrepAnalyzer.analyze(extractedProjectDir, review));
+        for (ReviewAgent agent : reviewAgents) {
+            List<Finding> agentFindings = agent.analyze(extractedProjectDir, review);
+            if (agentFindings != null && !agentFindings.isEmpty()) {
+                findings.addAll(agentFindings);
+            }
+        }
 
         if (!findings.isEmpty()) {
             findingRepository.saveAll(findings);
@@ -53,24 +49,24 @@ public class ReviewEngine {
         review.setQualityScore(Math.max(0, score));
         review = reviewRepository.save(review);
 
-        // AI explanations are optional and must never block the deterministic review.
-        if (!findings.isEmpty()) aiService.generateExplanations(findings);
+        // AI explanations are optional and must never block deterministic analysis.
+        if (!findings.isEmpty()) {
+            try {
+                aiService.generateExplanations(findings);
+            } catch (RuntimeException ignored) {
+                // Preserve scan results if an optional AI provider is unavailable.
+            }
+        }
         return review;
     }
 
     public ReviewEngine(ReviewRepository reviewRepository,
                         FindingRepository findingRepository,
-                        CodeQualityAnalyzer codeQualityAnalyzer,
-                        SecurityAnalyzer securityAnalyzer,
-                        ArchitectureAnalyzer architectureAnalyzer,
-                        SemgrepAnalyzer semgrepAnalyzer,
+                        List<ReviewAgent> reviewAgents,
                         AIService aiService) {
         this.reviewRepository = reviewRepository;
         this.findingRepository = findingRepository;
-        this.codeQualityAnalyzer = codeQualityAnalyzer;
-        this.securityAnalyzer = securityAnalyzer;
-        this.architectureAnalyzer = architectureAnalyzer;
-        this.semgrepAnalyzer = semgrepAnalyzer;
+        this.reviewAgents = List.copyOf(reviewAgents);
         this.aiService = aiService;
     }
 }
