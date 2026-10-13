@@ -35,3 +35,21 @@
 .dg-dark .dg-radar-saved-turn,.dg-dark .dg-radar-thread-steps>div{background:#211b38;border-color:var(--line)}
 .dg-dark .dg-radar-thread-steps p{color:var(--muted)}
 @media(max-width:760px){.dg-radar-saved-turn{padding:15px}.dg-radar-saved-prompt{font-size:16px}}
+
+
+/* In-app confirmation dialog for destructive history actions */
+.dg-confirm-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(10,8,24,.64);backdrop-filter:blur(5px);animation:dg-confirm-fade-in .16s ease-out}
+.dg-confirm-dialog{width:min(440px,100%);padding:26px;border:1px solid var(--line,#ded8f5);border-radius:22px;background:var(--panel,#fff);color:var(--ink,#17132f);box-shadow:0 28px 90px rgba(8,5,24,.38);animation:dg-confirm-rise .18s ease-out}
+.dg-confirm-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;background:#fff0f0;color:#c83e54}
+.dg-confirm-dialog h2{margin:17px 0 8px;font-size:22px;letter-spacing:-.4px}
+.dg-confirm-dialog p{margin:0;color:var(--muted,#737297);font-size:14px;line-height:1.65;overflow-wrap:anywhere}
+.dg-confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:25px}
+.dg-confirm-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 15px;border-radius:12px;font:inherit;font-size:14px;font-weight:750;transition:transform .15s ease,opacity .15s ease}
+.dg-confirm-actions button:active:not(:disabled){transform:scale(.98)}
+.dg-confirm-actions button:disabled{opacity:.65;cursor:wait}
+.dg-confirm-cancel{border:1px solid var(--line,#ded8f5);background:transparent;color:var(--ink,#17132f)}
+.dg-confirm-delete{border:1px solid #c9364b;background:#d83e54;color:#fff;box-shadow:0 5px 14px rgba(216,62,84,.2)}
+.dg-confirm-delete:hover:not(:disabled){background:#c92e45}
+@keyframes dg-confirm-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes dg-confirm-rise{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.dg-confirm-backdrop,.dg-confirm-dialog{animation:none}.dg-confirm-actions button{transition:none}}
