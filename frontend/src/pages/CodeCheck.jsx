@@ -1,20 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ArrowDownToLine, ArrowRight, Bot, Check, ChevronDown, Code2, FileArchive, FileCode2, FileSearch, LoaderCircle, LogOut, Maximize2, Minus, Moon, Plus, Radar, RefreshCw, Search, Send, ShieldCheck, Sparkles, Trash2, Upload, WandSparkles, X, Zap } from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowRight, Bot, Check, ChevronDown, Code2, FileArchive, FileCode2, FileSearch, LoaderCircle, LogOut, Maximize2, Minus, Moon, PanelLeftClose, PanelLeftOpen, Plus, Radar, RefreshCw, Search, Send, Settings2, ShieldCheck, Sparkles, Trash2, Upload, WandSparkles, X, Zap } from 'lucide-react';
 import { applyFix, createChatSession, deleteChatSession, downloadReviewedProject, generateFix, getChatHistory, getChatSessions, getReviews, sendChatMessage, uploadProject } from '../lib/api';
 import useAppTheme from '../lib/useAppTheme';
 import '../workspace.css';
 import '../dg-upgrade.css';
 import '../assistant-overhaul.css';
 import MarkdownMessage from '../components/MarkdownMessage.jsx';
+import ProfileSettings from '../components/ProfileSettings.jsx';
 const auth = () => { try { return JSON.parse(localStorage.getItem('dataguard-auth') || '{}'); } catch { return {}; } };
 const nameOf = r => r?.projectName || r?.name || 'Untitled project';
 const findingsOf = r => r?.findings || r?.issues || [];
 const dateOf = r => r?.reviewDate || r?.createdAt;
 export default function CodeCheck() {
  const [dark,setDark]=useAppTheme();
- const navigate=useNavigate(), fileRef=useRef(null), chatRef=useRef(null), user=auth();
- const [reviews,setReviews]=useState([]),[selected,setSelected]=useState(null),[sessions,setSessions]=useState([]),[chatSession,setChatSession]=useState(null),[messages,setMessages]=useState([]);
+ const navigate=useNavigate(), fileRef=useRef(null), chatRef=useRef(null), chatPanelRef=useRef(null);
+ const [reviews,setReviews]=useState([]),[selected,setSelected]=useState(null),[sessions,setSessions]=useState([]),[chatSession,setChatSession]=useState(null),[messages,setMessages]=useState([]),[user,setUser]=useState(auth),[sidebarCollapsed,setSidebarCollapsed]=useState(false),[showChatMessages,setShowChatMessages]=useState(true),[profileSettingsOpen,setProfileSettingsOpen]=useState(false),[chatToDelete,setChatToDelete]=useState(null);
  const [profileOpen,setProfileOpen]=useState(false),[query,setQuery]=useState(''),[input,setInput]=useState(''),[chatExpanded,setChatExpanded]=useState(false),[busy,setBusy]=useState(false),[chatBusy,setChatBusy]=useState(false),[error,setError]=useState(''),[fix,setFix]=useState(null),[manualFixFinding,setManualFixFinding]=useState(null),[assistantOpen,setAssistantOpen]=useState(false),[assistantSession,setAssistantSession]=useState(null),[assistantMessages,setAssistantMessages]=useState([]),[assistantInput,setAssistantInput]=useState(''),[assistantBusy,setAssistantBusy]=useState(false),[scoreDetailsOpen,setScoreDetailsOpen]=useState(false),[scoreCategory,setScoreCategory]=useState('All'),[chatDeleteOpen,setChatDeleteOpen]=useState(false),[chatDeleteBusy,setChatDeleteBusy]=useState(false);
  async function refresh(){
   let reviewError='';
@@ -37,16 +38,18 @@ export default function CodeCheck() {
  async function prepareFix(f){setManualFixFinding(f);setBusy(true);try{setFix({...await generateFix(selected.id,f.id),finding:f});}catch(e){setError(e.message);}finally{setBusy(false);}}
  async function confirmFix(){if(!fix)return;setBusy(true);setError('');try{const result=await applyFix(selected.id,fix.finding.id);setFix(null);if(result?.status==='RESOLVED'||Number.isFinite(Number(result?.qualityScore))){setSelected(current=>current?({...current,qualityScore:Number.isFinite(Number(result?.qualityScore))?Number(result.qualityScore):current.qualityScore,findings:findingsOf(current).map(f=>String(f.id)===String(fix.finding.id)?({...f,status:'RESOLVED'}):f)}):current);}await refresh();const latest=await getReviews();setReviews(Array.isArray(latest)?latest:[]);const updated=Array.isArray(latest)?latest.find(r=>String(r.id)===String(selected.id)):null;if(updated){setSelected(updated);setError(result.message||'Review refreshed after applying the fix.');}else{setError(result.message||'Fix request completed, but the refreshed review could not be found. Reopen this scan to check its score.');}}catch(e){setError(e?.message||'The safe fix could not be applied.');}finally{setBusy(false);}}
  async function downloadProject(){if(!selected)return;setBusy(true);setError('');try{await downloadReviewedProject(selected.id,nameOf(selected));}catch(e){setError(e?.message||'Could not download the modified project ZIP.');}finally{setBusy(false);}}
- async function confirmDeleteCurrentChat(){if(!chatSession||chatDeleteBusy)return;setChatDeleteBusy(true);try{await deleteChatSession(chatSession.sessionId);setChatSession(null);setMessages([]);setChatDeleteOpen(false);await refresh();}catch(err){setError(err?.message||'Could not delete this chat.');setChatDeleteOpen(false);}finally{setChatDeleteBusy(false);}}
+ async function confirmDeleteCurrentChat(){const target=chatToDelete||chatSession;if(!target||chatDeleteBusy)return;setChatDeleteBusy(true);try{await deleteChatSession(target.sessionId);if(String(chatSession?.sessionId)===String(target.sessionId)){setChatSession(null);setMessages([]);}setChatToDelete(null);setChatDeleteOpen(false);await refresh();}catch(err){setError(err?.message||'Could not delete this chat.');setChatDeleteOpen(false);setChatToDelete(null);}finally{setChatDeleteBusy(false);}}
+ async function openChatSession(session){setChatSession(session);if(session.reviewId){const review=reviews.find(r=>String(r.id)===String(session.reviewId));if(review)setSelected(review);}try{const history=await getChatHistory(session.sessionId);setMessages(history.messages||[]);setShowChatMessages(true);chatPanelRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){setError(e.message||'Could not load this chat history.');}}
+ async function deleteHistorySession(session){setChatToDelete(session);setChatDeleteOpen(true);}
  async function openAssistant(){setAssistantOpen(true);if(assistantSession)return;try{const s=await createChatSession('DataGuard AI Assistant',selected?.id||null);setAssistantSession(s);setAssistantMessages([]);}catch(e){setError(e.message);}}
  async function sendAssistant(e){e.preventDefault();const text=assistantInput.trim();if(!text||assistantBusy)return;setAssistantInput('');setAssistantMessages(m=>m.concat({role:'user',content:text}));setAssistantBusy(true);try{const s=assistantSession||await createChatSession('DataGuard AI Assistant',selected?.id||null);setAssistantSession(s);const r=await sendChatMessage(text,s.sessionId);setAssistantMessages(m=>m.concat({role:'assistant',content:r.reply}));}catch(err){setAssistantMessages(m=>m.concat({role:'assistant',content:err.message}));}finally{setAssistantBusy(false);}}
  async function askAssistantAboutFinding(f){
-  if(!f||assistantBusy)return;
+  if(!f||chatBusy)return;
   const prompt="I am reviewing the project \""+nameOf(selected)+"\" (review #"+selected?.id+"). The automatic fixer could not safely patch this finding. Please help me fix it manually.\n\nFinding: "+(f.title||"Code finding")+"\nSeverity: "+(f.severity||"Unknown")+"\nFile: "+(f.filePath||"Unknown")+"\nLine: "+(f.lineNumber??"Unknown")+"\nDescription: "+(f.description||"No description supplied")+"\nEvidence: "+(f.evidence||"No code evidence supplied")+"\nRecommendation: "+(f.recommendation||"No recommendation supplied")+"\n\nExplain why an automatic patch is unsafe here, then give step-by-step manual instructions and a corrected code example. If the surrounding code is missing, clearly label assumptions and ask me to share the relevant file instead of inventing exact surrounding code. Do not claim you changed the uploaded project.";
-  setAssistantOpen(true);setAssistantInput('');setAssistantMessages(m=>m.concat({role:'user',content:prompt}));setAssistantBusy(true);
-  try{const s=await createChatSession('Manual fix: '+(f.title||'Code finding'),selected?.id||null);setAssistantSession(s);const r=await sendChatMessage(prompt,s.sessionId);setAssistantMessages(m=>m.concat({role:'assistant',content:r.reply}));}
-  catch(err){setAssistantMessages(m=>m.concat({role:'assistant',content:'I could not get a manual fix from the assistant: '+err.message}));}
-  finally{setAssistantBusy(false);}
+  setError('');setShowChatMessages(true);setChatBusy(true);setMessages(old=>old.concat({role:'user',content:prompt}));
+  try{let session=chatSession;if(!session){session=await createChatSession('Manual fix: '+(f.title||'Code finding'),selected?.id||null);setChatSession(session);}const response=await sendChatMessage(prompt,session.sessionId);setMessages(old=>old.concat({role:'assistant',content:response.reply}));}
+  catch(err){setMessages(old=>old.concat({role:'assistant',content:'I could not get a manual fix from the assistant: '+err.message}));}
+  finally{setChatBusy(false);setTimeout(()=>chatPanelRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'}),100);}
  }
  const welcome=!selected;
  const openFindings=findings.filter(f=>String(f.status).toUpperCase()!=='RESOLVED');
