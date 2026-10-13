@@ -6,6 +6,7 @@ import com.dataguard.repository.UserRepository;
 import com.dataguard.security.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -83,6 +84,50 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthDto.AuthResponse(
                 jwtToken, user.getEmail(), user.getFullName(), user.getRole().name()));
+    }
+
+    public record ProfileRequest(String fullName) {}
+    public record ChangePasswordRequest(String currentPassword, String newPassword) {}
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        return ResponseEntity.ok(new AuthDto.AuthResponse(null, user.getEmail(), user.getFullName(), user.getRole().name()));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileRequest request, Authentication authentication) {
+        if (request == null || isBlank(request.fullName())) {
+            return ResponseEntity.badRequest().body("Username is required.");
+        }
+        String fullName = request.fullName().trim();
+        if (fullName.length() > 80) {
+            return ResponseEntity.badRequest().body("Username must be 80 characters or fewer.");
+        }
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        user.setFullName(fullName);
+        userRepository.save(user);
+        return ResponseEntity.ok(new AuthDto.AuthResponse(null, user.getEmail(), user.getFullName(), user.getRole().name()));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Authentication authentication) {
+        if (request == null || isBlank(request.currentPassword()) || isBlank(request.newPassword())) {
+            return ResponseEntity.badRequest().body("Current password and new password are required.");
+        }
+        if (request.newPassword().length() < 8 || request.newPassword().length() > 72) {
+            return ResponseEntity.badRequest().body("New password must contain between 8 and 72 characters.");
+        }
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Current password is incorrect.");
+        }
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Choose a new password different from your current password.");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok(java.util.Map.of("message", "Password updated successfully."));
     }
 
     private boolean isBlank(String value) {
