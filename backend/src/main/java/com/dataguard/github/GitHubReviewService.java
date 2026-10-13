@@ -65,7 +65,7 @@ public class GitHubReviewService {
             byte[] archive = github.downloadRepositoryArchive(owner, repository, sha);
             extractArchive(archive, workspace);
             Path sourceRoot = findSourceRoot(workspace);
-            ReviewEngine.AnalysisResult analysis = reviewEngine.analyzeDirectory(sourceRoot);
+            ReviewEngine.AnalysisResult analysis = reviewEngine.analyzeDirectory(sourceRoot.toFile());
             List<Finding> findings = analysis.findings();
             ReviewResponse.ReviewMetrics metrics = ReviewResponse.ReviewMetrics.fromFindings(findings);
             String summary = buildSummary(metrics, findings.size());
