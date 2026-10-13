@@ -178,10 +178,6 @@ public class AIChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Sign in before using the AI assistant."));
         }
         if (!allowAiRequest(authentication.getName())) return tooManyAiRequests();
-        if (!provider.isConfigured()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("message", "AI is not configured on the server. Set GROQ_API_KEY in the backend environment."));
-        }
         try {
             User user = currentUser(authentication);
             if (request.sessionId() == null) {
@@ -195,14 +191,25 @@ public class AIChatController {
                 return ResponseEntity.badRequest().body(Map.of("message", "Use AI Radar to continue this conversation."));
             }
 
-            List<Turn> turns = new ArrayList<>();
-            turns.add(new Turn("system", buildSystemContext(conversation)));
-            messageRepository.findTop20BySessionOrderByCreatedAtDesc(conversation).stream()
-                    .sorted(Comparator.comparing(AIConversationMessage::getCreatedAt))
-                    .forEach(message -> turns.add(new Turn(message.getRole(), message.getContent())));
-            turns.add(new Turn("user", request.message().trim()));
-            String reply = provider.complete(turns);
-            saveMessage(conversation, "user", request.message().trim());
+            String userMessage = request.message().trim();
+            String reply;
+            if (isSimpleGreeting(userMessage)) {
+                // Keep greetings brief; a simple "hi" must not trigger a full scan summary.
+                reply = "Hello!";
+            } else {
+                if (!provider.isConfigured()) {
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                            .body(Map.of("message", "AI is not configured on the server. Set GROQ_API_KEY in the backend environment."));
+                }
+                List<Turn> turns = new ArrayList<>();
+                turns.add(new Turn("system", buildSystemContext(conversation)));
+                messageRepository.findTop20BySessionOrderByCreatedAtDesc(conversation).stream()
+                        .sorted(Comparator.comparing(AIConversationMessage::getCreatedAt))
+                        .forEach(message -> turns.add(new Turn(message.getRole(), message.getContent())));
+                turns.add(new Turn("user", userMessage));
+                reply = provider.complete(turns);
+            }
+            saveMessage(conversation, "user", userMessage);
             saveMessage(conversation, "assistant", reply);
             conversation.setUpdatedAt(Instant.now());
             sessionRepository.save(conversation);
@@ -230,6 +237,11 @@ public class AIChatController {
         result.put("reviewId", conversation.getReview() == null ? null : conversation.getReview().getId());
         result.put("messages", messages);
         return ResponseEntity.ok(result);
+    }
+
+    private boolean isSimpleGreeting(String message) {
+        return message != null && message.trim().toLowerCase(java.util.Locale.ROOT)
+                .matches("^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?,\\s]*$");
     }
 
     private String buildSystemContext(AIConversationSession conversation) {
