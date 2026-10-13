@@ -65,13 +65,25 @@ export default function AIRadar(){
 
 function RadarThread({messages}) {
  const turns=[];
- for(let i=0;i<messages.length;i++){
-  const m=messages[i];
-  if(m.role==='user') turns.push({prompt:m.content,reply:null});
-  else if(m.role==='assistant'&&turns.length) turns[turns.length-1].reply=dataOf({reply:m.content});
+ for(const message of messages){
+  if(message.role==='user') turns.push({prompt:message.content,reply:null});
+  else if(message.role==='assistant'&&turns.length) turns[turns.length-1].reply=dataOf({reply:message.content});
  }
- return <section className="dg-radar-results dg-radar-thread"><div className="dg-result-intro"><p className="dg-eyebrow">SAVED CONVERSATION</p><h2>Full AI Radar history</h2><p>Every saved prompt and its response in this session.</p></div>
- {turns.map((turn,i)=>{const d=turn.reply||{},isWorkflow=Array.isArray(d.steps)||d.radarMode==='workflow';const items=isWorkflow?(d.recommendedTools||d.tools||[]):(d.tools||d.recommendedTools||[]);return <article className="dg-radar-turn" key={i}><div className="dg-radar-turn-prompt"><span>{i+1}</span><div><small>Your prompt</small><p>{turn.prompt}</p></div></div>{turn.reply&&<div className="dg-radar-turn-answer"><div className="dg-radar-turn-title"><Sparkles size={16}/><strong>{d.title||(isWorkflow?'Workflow response':'Recommended tools')}</strong><span>{isWorkflow?'Workflow':'Find Tools'}</span></div>{d.summary&&<p>{d.summary}</p>}{isWorkflow&&Array.isArray(d.steps)&&<div className="dg-radar-thread-steps">{d.steps.map((step,j)=><div key={j}><b>Step {j+1}: {step.title||'Workflow step'}</b><p>{step.action}</p>{step.deliverable&&<small>Deliverable: {step.deliverable}</small>}</div>)}</div>}{items.length>0&&<div className="dg-radar-thread-tools"><h4>{isWorkflow?'Recommended tools':'Tools found'} ({items.length})</h4><div className="dg-tool-grid">{items.map((tool,j)=><ToolCard key={tool.name||j} tool={tool}/>)}</div></div>}{d.message&&<p className="dg-alert">{d.message}</p>}{!d.title&&!d.summary&&!items.length&&!Array.isArray(d.steps)&&!d.message&&<p className="dg-chat-empty">A saved response is available, but its structured result could not be displayed.</p>}</div>}</article>})}
+ return <section className="dg-radar-thread">
+ {turns.map((turn,i)=>{
+  const d=turn.reply||{},isWorkflow=Array.isArray(d.steps)||d.radarMode==='workflow';
+  const items=isWorkflow?(d.recommendedTools||d.tools||[]):(d.tools||d.recommendedTools||[]);
+  const isFailure=Boolean(d.error||d.message);
+  return <article className="dg-radar-saved-turn" key={i}>
+   <h2 className="dg-radar-saved-prompt">{turn.prompt}</h2>
+   {turn.reply&&<div className="dg-radar-saved-content">
+    {isWorkflow&&Array.isArray(d.steps)&&<><h3 className="dg-radar-saved-section-title">{d.title||'Workflow'}</h3>{d.summary&&<p className="dg-radar-saved-summary">{d.summary}</p>}<div className="dg-radar-thread-steps">{d.steps.map((step,j)=><div key={j}><b>Step {j+1}: {step.title||'Workflow step'}</b><p>{step.action}</p>{step.deliverable&&<small>Deliverable: {step.deliverable}</small>}{step.timeEstimate&&<small>{step.timeEstimate}</small>}</div>)}</div></>}
+    {items.length>0&&<><h3 className="dg-radar-saved-section-title">{isWorkflow?'Recommended tools':'Tools found'} <span>({items.length})</span></h3><div className="dg-tool-grid">{items.map((tool,j)=><ToolCard key={tool.name||j} tool={tool}/>)}</div></>}
+    {isFailure&&<p className="dg-alert">{d.message||'This request did not return a saved result.'}</p>}
+    {!items.length&&!Array.isArray(d.steps)&&!isFailure&&<p className="dg-chat-empty">No saved recommendations were found for this prompt.</p>}
+   </div>}
+  </article>
+ })}
  </section>;
 }
 
