@@ -1,19 +1,23 @@
 package com.dataguard.agent;
 
 import com.dataguard.analyzer.CodeQualityAnalyzer;
+import com.dataguard.analyzer.SyntaxAnalyzer;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Review;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class CodeQualityAgent implements ReviewAgent {
     private final CodeQualityAnalyzer analyzer;
+    private final SyntaxAnalyzer syntaxAnalyzer;
 
-    public CodeQualityAgent(CodeQualityAnalyzer analyzer) {
+    public CodeQualityAgent(CodeQualityAnalyzer analyzer, SyntaxAnalyzer syntaxAnalyzer) {
         this.analyzer = analyzer;
+        this.syntaxAnalyzer = syntaxAnalyzer;
     }
 
     @Override
@@ -23,6 +27,8 @@ public class CodeQualityAgent implements ReviewAgent {
 
     @Override
     public List<Finding> analyze(File projectDirectory, Review review) {
-        return analyzer.analyze(projectDirectory, review);
+        List<Finding> findings = new ArrayList<>(syntaxAnalyzer.analyze(projectDirectory, review));
+        findings.addAll(analyzer.analyze(projectDirectory, review));
+        return findings;
     }
 }
