@@ -23,7 +23,7 @@ public record ReviewResponse(
 
     public static ReviewResponse from(Review review, List<Finding> findings, Integer fileCount, Long linesOfCode) {
         List<FindingResponse> responseFindings = findings.stream().map(FindingResponse::from).toList();
-        ReviewMetrics metrics = ReviewMetrics.from(findings);
+        ReviewMetrics metrics = ReviewMetrics.fromFindings(findings);
         return new ReviewResponse(review.getId(), review.getProject().getName(), review.getQualityScore(),
                 review.getReviewDate(), fileCount, linesOfCode, responseFindings, metrics);
     }
@@ -41,7 +41,7 @@ public record ReviewResponse(
             long architectureIssues,
             long openIssues) {
 
-        private static ReviewMetrics from(List<Finding> findings) {
+        public static ReviewMetrics fromFindings(List<Finding> findings) {
             long syntax = 0, bugs = 0, quality = 0, security = 0, architecture = 0, open = 0;
             for (Finding finding : findings) {
                 String category = normalize(finding.getCategory());
