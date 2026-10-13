@@ -22,11 +22,16 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
     }
 
-    public WebConfig(@Value("${app.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173,https://data-guard-ecru.vercel.app/}") String allowedOrigins) {
-        this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
+    public WebConfig(@Value("${app.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}") String configuredOrigins) {
+        // Keep the known production Vercel origin available even if a Render environment
+        // variable was left with local-only origins. Do not use wildcard origins with JWT.
+        this.allowedOrigins = java.util.stream.Stream.concat(
+                        Arrays.stream(configuredOrigins.split(",")),
+                        java.util.stream.Stream.of("https://data-guard-ecru.vercel.app"))
                 .map(String::trim)
                 .map(origin -> origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin)
                 .filter(origin -> !origin.isEmpty())
+                .distinct()
                 .toArray(String[]::new);
     }
 }
