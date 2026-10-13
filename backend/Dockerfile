@@ -14,7 +14,7 @@ RUN apt-get update \
     && mv /opt/pmd-bin-7.27.0 /opt/pmd \
     && /opt/pmd/bin/pmd --version \
     && mkdir -p /tmp/pmd-smoke \
-    && printf 'class Smoke { void run() { System.out.println("review"); } }\\n' > /tmp/pmd-smoke/Smoke.java \
+    && printf 'class Smoke { void run() { System.out.println("review"); } }\n' > /tmp/pmd-smoke/Smoke.java \
     && /opt/pmd/bin/pmd check --dir /tmp/pmd-smoke --rulesets rulesets/java/quickstart.xml --format json --report-file /tmp/pmd-smoke.json --no-fail-on-violation --no-progress \
     && test -s /tmp/pmd-smoke.json \
     && rm -rf /tmp/pmd-smoke /tmp/pmd-smoke.json \
