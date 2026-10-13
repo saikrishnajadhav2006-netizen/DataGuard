@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @Service
 public class ReviewEngine {
@@ -25,15 +28,27 @@ public class ReviewEngine {
         review.setQualityScore(100);
         review = reviewRepository.save(review);
 
-        // All entry points (ZIP uploads and future GitHub events) share this pipeline.
-        // Semgrep is executed inside SecurityAgent; it is not a separate agent.
-        List<Finding> findings = new ArrayList<>();
+        // ZIP uploads and any future GitHub event handler share this orchestration.
+        // Semgrep runs within SecurityAgent and is not a separate agent.
+        List<Finding> collected = new ArrayList<>();
         for (ReviewAgent agent : reviewAgents) {
             List<Finding> agentFindings = agent.analyze(extractedProjectDir, review);
-            if (agentFindings != null && !agentFindings.isEmpty()) {
-                findings.addAll(agentFindings);
+            if (agentFindings != null) {
+                collected.addAll(agentFindings);
             }
         }
+
+        // Avoid charging the score multiple times for the same finding emitted
+        // by overlapping analyzers. Keep the first finding and its evidence.
+        Map<String, Finding> unique = new LinkedHashMap<>();
+        for (Finding finding : collected) {
+            String key = normalize(finding.getCategory()) + "|"
+                    + normalize(finding.getFilePath()) + "|"
+                    + (finding.getLineNumber() == null ? "" : finding.getLineNumber()) + "|"
+                    + normalize(finding.getTitle());
+            unique.putIfAbsent(key, finding);
+        }
+        List<Finding> findings = new ArrayList<>(unique.values());
 
         if (!findings.isEmpty()) {
             findingRepository.saveAll(findings);
@@ -54,10 +69,14 @@ public class ReviewEngine {
             try {
                 aiService.generateExplanations(findings);
             } catch (RuntimeException ignored) {
-                // Preserve scan results if an optional AI provider is unavailable.
+                // Preserve the completed static-analysis results if AI is unavailable.
             }
         }
         return review;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
     }
 
     public ReviewEngine(ReviewRepository reviewRepository,
