@@ -20,6 +20,7 @@ export default function AIRadar(){
  const navigate=useNavigate(),user=auth();
  const [mode,setMode]=useState('find'),[prompt,setPrompt]=useState(''),[category,setCategory]=useState(''),[budget,setBudget]=useState('any');
  const [sessions,setSessions]=useState([]),[active,setActive]=useState(null),[result,setResult]=useState(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[query,setQuery]=useState(''),[dark,setDark]=useState(false),[retry,setRetry]=useState(null),[collapsed,setCollapsed]=useState({find:false,workflow:false});
+ const [profileOpen,setProfileOpen]=useState(false);
  const [assistant,setAssistant]=useState(false),[chatSession,setChatSession]=useState(null),[chatMessages,setChatMessages]=useState([]),[chatInput,setChatInput]=useState(''),[chatBusy,setChatBusy]=useState(false);
  useEffect(()=>{refresh();},[]);
  async function refresh(){
