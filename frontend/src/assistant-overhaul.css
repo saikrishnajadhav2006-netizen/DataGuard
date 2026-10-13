@@ -140,3 +140,12 @@
 .dg-ai-attachment{display:flex;align-items:center;gap:10px;padding:5px 8px;margin-bottom:6px;background:#f5f1ff;border-radius:7px;color:#51446f;font-size:11px;overflow-wrap:anywhere;}
 .dg-ai-attachment button{border:0;background:transparent;color:#7655dc;cursor:pointer;font-size:11px;}
 @media(max-width:760px){.dg-ai-nav{gap:0}.dg-ai-nav button{font-size:0;padding:9px}.dg-ai-nav button svg{width:17px;height:17px}.dg-ai-composer{padding-left:48px;}}
+
+
+/* High-contrast assistant controls. */
+.dg-assistant-popover .dg-chat-form button{background:#211b38!important;border:1px solid #51456f!important;color:#fff!important;box-shadow:0 6px 18px rgba(16,11,37,.25);}
+.dg-assistant-popover .dg-chat-form button:hover:not(:disabled){background:#4a347c!important;border-color:#8b70dd!important;}
+.dg-dark .dg-assistant-popover .dg-chat-form button{background:#17132b!important;color:#f5f0ff!important;border-color:#65528e!important;}
+.dg-assistant-popover .dg-popover-head>span>svg{color:#b9a5ff;}
+.dg-assistant-popover .dg-popover-head button:hover{background:#eee8ff;color:#5d42bd;}
+.dg-dark .dg-assistant-popover .dg-popover-head button:hover{background:#40375f;color:#fff;}
