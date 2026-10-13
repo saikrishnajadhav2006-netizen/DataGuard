@@ -57,5 +57,5 @@ function fixLayout(){const patch=$('#dp');if(patch){patch.hidden=true;patch.disa
 const l=document.createElement('link');l.rel='stylesheet';l.href='/dataguard-followup-fixes.css';document.head.append(l);
 fixLayout();
 $$('.side .brand').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(window.go)window.go('check');else if(window.setDv)window.setDv('check')},true));
-setTimeout(()=>{let v='';try{v=localStorage.getItem(viewKey)||''}catch(e){}if(v&&token()&&window.go)window.go(v)},0);
+// Do not restore a remembered dashboard tab on page load: the React router owns direct URLs, and '/' must always show the homepage.
 })();
