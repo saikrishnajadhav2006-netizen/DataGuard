@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Bot, BookOpen, Check, ChevronDown, Code2, Compass, ExternalLink, GitBranch, Headphones, Image, LoaderCircle, LogOut, Megaphone, Moon, PenLine, Plus, Radar, RefreshCw, Search, Send, Sparkles, TrendingUp, Video, Workflow, X, Zap } from 'lucide-react';
 import { createChatSession, deleteChatSession, getChatHistory, getChatSessions, sendChatMessage, sendRadarPrompt } from '../lib/api';
+import useAppTheme from '../lib/useAppTheme';
 import '../workspace.css';
 import '../dg-upgrade.css';
 import '../assistant-overhaul.css';
@@ -18,8 +19,9 @@ const dayLabel=d=>{if(!d)return 'Earlier';const n=Math.floor((new Date().setHour
 function SkeletonCards({n=3}){return <div className="dg-tool-grid">{Array.from({length:n},(_,i)=><article className="dg-tool-card dg-skel" key={i}><i style={{width:46,height:46,borderRadius:14}}/><i style={{height:14,width:'55%'}}/><i style={{height:11}}/><i style={{height:11,width:'70%'}}/></article>)}</div>}
 export default function AIRadar(){
  const navigate=useNavigate(),user=auth();
+ const [dark,setDark]=useAppTheme();
  const [mode,setMode]=useState('find'),[prompt,setPrompt]=useState(''),[category,setCategory]=useState(''),[budget,setBudget]=useState('any');
- const [sessions,setSessions]=useState([]),[active,setActive]=useState(null),[result,setResult]=useState(null),[radarThread,setRadarThread]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[query,setQuery]=useState(''),[dark,setDark]=useState(false),[retry,setRetry]=useState(null),[collapsed,setCollapsed]=useState({find:false,workflow:false});
+ const [sessions,setSessions]=useState([]),[active,setActive]=useState(null),[result,setResult]=useState(null),[radarThread,setRadarThread]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[query,setQuery]=useState(''),[retry,setRetry]=useState(null),[collapsed,setCollapsed]=useState({find:false,workflow:false});
  const [profileOpen,setProfileOpen]=useState(false);
  const [assistant,setAssistant]=useState(false),[chatSession,setChatSession]=useState(null),[chatMessages,setChatMessages]=useState([]),[chatInput,setChatInput]=useState(''),[chatBusy,setChatBusy]=useState(false);
  useEffect(()=>{refresh();},[]);
