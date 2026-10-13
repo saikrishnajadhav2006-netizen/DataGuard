@@ -26,4 +26,20 @@ class ArchitectureAnalyzerTest {
         assertEquals("src/Sample.java", findings.get(0).getFilePath());
         assertTrue(findings.get(0).getEvidence().contains("501 lines"));
     }
+
+    @Test
+    void reportsControllerThatDependsDirectlyOnRepository() throws Exception {
+        Path source = Files.createDirectories(root.resolve("src/main/java/example"));
+        Files.writeString(source.resolve("ExampleController.java"), """
+                package example;
+                import example.repository.UserRepository;
+                @RestController
+                class ExampleController {}
+                """);
+
+        List<Finding> findings = new ArchitectureAnalyzer().analyze(root.toFile(), new Review());
+        assertEquals(1, findings.size());
+        assertEquals("Controller depends directly on repository", findings.get(0).getTitle());
+        assertEquals(2, findings.get(0).getLineNumber());
+    }
 }
