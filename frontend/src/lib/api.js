@@ -6,7 +6,7 @@ async function request(path, options = {}) {
  const headers = { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(options.headers || {}) };
  let response;
  try { response = await fetch(API_URL + path, { ...options, headers }); }
- catch { throw new Error('Cannot reach the DataGuard server. Check your connection and that the backend is running (VITE_API_URL / CORS_ALLOWED_ORIGINS).'); }
+ catch { const site = typeof window !== 'undefined' ? window.location.origin : 'unknown site'; throw new Error('Cannot reach the DataGuard server from ' + site + '. API base URL: ' + (API_URL || '(VITE_API_URL is empty)') + '. Check the Render backend is running and CORS_ALLOWED_ORIGINS includes this exact site origin. Open /diagnostics for connection checks.'); }
  const type = response.headers.get('content-type') || '';
  if (response.status === 401 && token) { try { localStorage.removeItem('dataguard-auth'); } catch { /* ignore */ } if (typeof window !== 'undefined' && !/^\/(login|register)/.test(window.location.pathname)) window.location.assign('/login'); throw new Error('Your session has expired. Please sign in again.'); }
  const body = type.includes('application/json') ? await response.json().catch(() => ({})) : await response.text();
