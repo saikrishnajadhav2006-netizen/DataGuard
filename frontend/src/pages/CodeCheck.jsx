@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, ArrowDownToLine, ArrowRight, Bot, Check, ChevronDown, Code2, FileArchive, FileCode2, FileSearch, LoaderCircle, LogOut, Moon, Plus, Radar, RefreshCw, Search, Send, ShieldCheck, Sparkles, Upload, WandSparkles, X, Zap } from 'lucide-react';
 import { applyFix, createChatSession, deleteChatSession, downloadReviewedProject, generateFix, getChatHistory, getChatSessions, getReviews, sendChatMessage, uploadProject } from '../lib/api';
+import useAppTheme from '../lib/useAppTheme';
 import '../workspace.css';
 import '../dg-upgrade.css';
 import '../assistant-overhaul.css';
@@ -11,9 +12,10 @@ const nameOf = r => r?.projectName || r?.name || 'Untitled project';
 const findingsOf = r => r?.findings || r?.issues || [];
 const dateOf = r => r?.reviewDate || r?.createdAt;
 export default function CodeCheck() {
+ const [dark,setDark]=useAppTheme();
  const navigate=useNavigate(), fileRef=useRef(null), chatRef=useRef(null), user=auth();
  const [reviews,setReviews]=useState([]),[selected,setSelected]=useState(null),[sessions,setSessions]=useState([]),[chatSession,setChatSession]=useState(null),[messages,setMessages]=useState([]);
- const [profileOpen,setProfileOpen]=useState(false),[query,setQuery]=useState(''),[input,setInput]=useState(''),[chatExpanded,setChatExpanded]=useState(false),[busy,setBusy]=useState(false),[chatBusy,setChatBusy]=useState(false),[error,setError]=useState(''),[fix,setFix]=useState(null),[dark,setDark]=useState(false),[assistantOpen,setAssistantOpen]=useState(false),[assistantSession,setAssistantSession]=useState(null),[assistantMessages,setAssistantMessages]=useState([]),[assistantInput,setAssistantInput]=useState(''),[assistantBusy,setAssistantBusy]=useState(false);
+ const [profileOpen,setProfileOpen]=useState(false),[query,setQuery]=useState(''),[input,setInput]=useState(''),[chatExpanded,setChatExpanded]=useState(false),[busy,setBusy]=useState(false),[chatBusy,setChatBusy]=useState(false),[error,setError]=useState(''),[fix,setFix]=useState(null),[assistantOpen,setAssistantOpen]=useState(false),[assistantSession,setAssistantSession]=useState(null),[assistantMessages,setAssistantMessages]=useState([]),[assistantInput,setAssistantInput]=useState(''),[assistantBusy,setAssistantBusy]=useState(false);
  async function refresh(){
   let reviewError='';
   try { const data=await getReviews(); setReviews(Array.isArray(data)?data:[]); }
