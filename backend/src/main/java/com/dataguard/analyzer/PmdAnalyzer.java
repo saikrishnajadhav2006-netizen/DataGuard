@@ -68,9 +68,12 @@ public class PmdAnalyzer {
                 process.destroyForcibly();
                 throw new IllegalStateException("PMD exceeded its configured scan timeout.");
             }
-            if (process.exitValue() != 0) {
-                throw new IllegalStateException("PMD failed to run. Check the configured PMD CLI and ruleset.");
+            if (!Files.isRegularFile(report) || Files.size(report) == 0) {
+                throw new IllegalStateException("PMD failed to produce a report. Check the configured PMD CLI and ruleset (exit code "
+                        + process.exitValue() + ").");
             }
+            // PMD can return a non-zero exit code when source parsing fails while still
+            // producing useful findings for the rest of the repository.
             return parseResults(Files.readString(report, StandardCharsets.UTF_8), projectDir, review);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
