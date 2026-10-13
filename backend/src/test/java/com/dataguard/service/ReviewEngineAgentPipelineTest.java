@@ -35,7 +35,7 @@ class ReviewEngineAgentPipelineTest {
         ReviewEngine.AnalysisResult result = engine.analyzeDirectory(root.toFile());
 
         assertEquals(2, result.findings().size());
-        assertEquals(85, result.qualityScore());
+        assertEquals(98, result.qualityScore()); // One point is deducted per unique finding.
         verify(quality).analyze(eq(root.toFile()), any(Review.class));
         verify(security).analyze(eq(root.toFile()), any(Review.class));
         verify(architecture).analyze(eq(root.toFile()), any(Review.class));
