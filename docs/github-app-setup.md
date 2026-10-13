@@ -14,7 +14,7 @@ Set these environment variables in Render. Do not commit their values to GitHub:
 - `GITHUB_APP_PRIVATE_KEY`: the complete PEM private key downloaded from the GitHub App settings. Preserve newlines, or represent line breaks as `\n`.
 - `GITHUB_WEBHOOK_SECRET`: the exact webhook secret configured in GitHub App settings.
 
-The Docker image installs the syntax parser, Semgrep, and PMD and enables those tools for the review pipeline. PMD is used inside the Code Quality agent; Semgrep is used inside the Security agent.
+The Docker image installs the syntax parser, Semgrep, and PMD and enables those tools for the review pipeline. PMD is used inside the Code Quality agent; Semgrep is used inside the Security agent. For local development, install the syntax parser in the Python environment configured by `DATAGUARD_PYTHON_EXECUTABLE` with `python -m pip install tree-sitter-language-pack==0.13.0`.
 
 ## GitHub App settings
 
