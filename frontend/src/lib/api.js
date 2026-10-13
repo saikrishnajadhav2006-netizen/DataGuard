@@ -33,3 +33,6 @@ export function getChatHistory(id) { return request('/api/ai/chat/history?sessio
 export function sendChatMessage(message,sessionId) { return request('/api/ai/chat',{method:'POST',body:JSON.stringify({message,sessionId})}); }
 export function sendRadarPrompt(prompt,mode,category,budget,sessionId=null) { return request('/api/ai/radar',{method:'POST',body:JSON.stringify({prompt,mode,category,budget,sessionId})}); }
 export function deleteChatSession(id) { return request('/api/ai/chat/sessions/'+encodeURIComponent(id),{method:'DELETE'}); }
+
+export function updateProfile(fullName) { return request('/api/auth/profile',{method:'PUT',body:JSON.stringify({fullName})}); }
+export function changePassword(currentPassword,newPassword) { return request('/api/auth/change-password',{method:'POST',body:JSON.stringify({currentPassword,newPassword})}); }
