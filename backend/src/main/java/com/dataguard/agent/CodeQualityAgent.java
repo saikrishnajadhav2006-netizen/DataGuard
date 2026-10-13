@@ -1,6 +1,7 @@
 package com.dataguard.agent;
 
 import com.dataguard.analyzer.CodeQualityAnalyzer;
+import com.dataguard.analyzer.PotentialBugAnalyzer;
 import com.dataguard.analyzer.SyntaxAnalyzer;
 import com.dataguard.entity.Finding;
 import com.dataguard.entity.Review;
@@ -14,10 +15,13 @@ import java.util.List;
 public class CodeQualityAgent implements ReviewAgent {
     private final CodeQualityAnalyzer analyzer;
     private final SyntaxAnalyzer syntaxAnalyzer;
+    private final PotentialBugAnalyzer potentialBugAnalyzer;
 
-    public CodeQualityAgent(CodeQualityAnalyzer analyzer, SyntaxAnalyzer syntaxAnalyzer) {
+    public CodeQualityAgent(CodeQualityAnalyzer analyzer, SyntaxAnalyzer syntaxAnalyzer,
+                            PotentialBugAnalyzer potentialBugAnalyzer) {
         this.analyzer = analyzer;
         this.syntaxAnalyzer = syntaxAnalyzer;
+        this.potentialBugAnalyzer = potentialBugAnalyzer;
     }
 
     @Override
@@ -29,6 +33,7 @@ public class CodeQualityAgent implements ReviewAgent {
     public List<Finding> analyze(File projectDirectory, Review review) {
         List<Finding> findings = new ArrayList<>(syntaxAnalyzer.analyze(projectDirectory, review));
         findings.addAll(analyzer.analyze(projectDirectory, review));
+        findings.addAll(potentialBugAnalyzer.analyze(projectDirectory, review));
         return findings;
     }
 }
