@@ -53,7 +53,7 @@ public class CodeQualityAnalyzer {
                             "Replace standard output with structured logging, or remove the diagnostic print if it is no longer needed."));
                 }
                 if (EMPTY_CATCH.matcher(sourceLine).matches()) {
-                    findings.add(createFinding(review, "CODE_QUALITY", "HIGH", "Empty catch block",
+                    findings.add(createFinding(review, "BUG", "HIGH", "Empty catch block",
                             relative, i + 1, sourceLine.trim(),
                             "Handle the exception explicitly. Log it or throw a meaningful exception rather than silently swallowing the failure."));
                 }
