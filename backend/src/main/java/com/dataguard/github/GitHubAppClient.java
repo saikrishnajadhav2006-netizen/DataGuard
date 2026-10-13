@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -58,6 +56,20 @@ public class GitHubAppClient {
             throw new IllegalStateException("GitHub did not return an installation access token.");
         }
         return token;
+    }
+
+    public byte[] downloadRepositoryArchive(String owner, String repository, String sha) {
+        // DataGuard is a public repository; codeload avoids the API's redirect response.
+        byte[] archive = RestClient.create().get()
+                .uri("https://codeload.github.com/{owner}/{repo}/legacy.zip/{sha}", owner, repository, sha)
+                .retrieve().body(byte[].class);
+        if (archive == null || archive.length == 0) {
+            throw new IllegalStateException("GitHub returned an empty source archive.");
+        }
+        if (archive.length > 100 * 1024 * 1024) {
+            throw new IllegalStateException("The repository archive exceeds the configured 100 MB compressed limit.");
+        }
+        return archive;
     }
 
     public long createCheckRun(String token, String owner, String repository, String sha) {
