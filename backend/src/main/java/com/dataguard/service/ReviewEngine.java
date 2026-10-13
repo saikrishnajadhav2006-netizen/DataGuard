@@ -28,40 +28,13 @@ public class ReviewEngine {
         review.setQualityScore(100);
         review = reviewRepository.save(review);
 
-        // ZIP uploads and any future GitHub event handler share this orchestration.
-        // Semgrep runs within SecurityAgent and is not a separate agent.
-        List<Finding> collected = new ArrayList<>();
-        for (ReviewAgent agent : reviewAgents) {
-            List<Finding> agentFindings = agent.analyze(extractedProjectDir, review);
-            if (agentFindings != null) {
-                collected.addAll(agentFindings);
-            }
-        }
-
-        // Avoid charging the score multiple times for the same finding emitted
-        // by overlapping analyzers. Keep the first finding and its evidence.
-        Map<String, Finding> unique = new LinkedHashMap<>();
-        for (Finding finding : collected) {
-            String key = normalize(finding.getCategory()) + "|"
-                    + normalize(finding.getFilePath()) + "|"
-                    + (finding.getLineNumber() == null ? "" : finding.getLineNumber()) + "|"
-                    + normalize(finding.getTitle());
-            unique.putIfAbsent(key, finding);
-        }
-        List<Finding> findings = new ArrayList<>(unique.values());
-
+        AnalysisResult analysis = analyzeDirectory(extractedProjectDir, review);
+        List<Finding> findings = analysis.findings();
         if (!findings.isEmpty()) {
             findingRepository.saveAll(findings);
         }
 
-        int score = 100;
-        for (Finding finding : findings) {
-            if ("CRITICAL".equalsIgnoreCase(finding.getSeverity())) score -= 15;
-            else if ("HIGH".equalsIgnoreCase(finding.getSeverity())) score -= 10;
-            else if ("MEDIUM".equalsIgnoreCase(finding.getSeverity())) score -= 5;
-            else score -= 2;
-        }
-        review.setQualityScore(Math.max(0, score));
+        review.setQualityScore(analysis.qualityScore());
         review = reviewRepository.save(review);
 
         // AI explanations are optional and must never block deterministic analysis.
@@ -75,9 +48,50 @@ public class ReviewEngine {
         return review;
     }
 
+    /**
+     * Runs the exact same agent pipeline without persisting a website review.
+     * This lets GitHub Check Runs reuse analysis without creating fake user projects.
+     */
+    public AnalysisResult analyzeDirectory(File projectDirectory) {
+        return analyzeDirectory(projectDirectory, new Review());
+    }
+
+    private AnalysisResult analyzeDirectory(File projectDirectory, Review review) {
+        if (projectDirectory == null || !projectDirectory.isDirectory()) {
+            throw new IllegalArgumentException("Review requires an existing project directory.");
+        }
+        List<Finding> collected = new ArrayList<>();
+        for (ReviewAgent agent : reviewAgents) {
+            List<Finding> agentFindings = agent.analyze(projectDirectory, review);
+            if (agentFindings != null) collected.addAll(agentFindings);
+        }
+
+        // Deduplicate overlapping analyzer output before scoring or reporting.
+        Map<String, Finding> unique = new LinkedHashMap<>();
+        for (Finding finding : collected) {
+            String key = normalize(finding.getCategory()) + "|"
+                    + normalize(finding.getFilePath()) + "|"
+                    + (finding.getLineNumber() == null ? "" : finding.getLineNumber()) + "|"
+                    + normalize(finding.getTitle());
+            unique.putIfAbsent(key, finding);
+        }
+        List<Finding> findings = new ArrayList<>(unique.values());
+
+        int score = 100;
+        for (Finding finding : findings) {
+            if ("CRITICAL".equalsIgnoreCase(finding.getSeverity())) score -= 15;
+            else if ("HIGH".equalsIgnoreCase(finding.getSeverity())) score -= 10;
+            else if ("MEDIUM".equalsIgnoreCase(finding.getSeverity())) score -= 5;
+            else score -= 2;
+        }
+        return new AnalysisResult(List.copyOf(findings), Math.max(0, score));
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
     }
+
+    public record AnalysisResult(List<Finding> findings, int qualityScore) {}
 
     public ReviewEngine(ReviewRepository reviewRepository,
                         FindingRepository findingRepository,
