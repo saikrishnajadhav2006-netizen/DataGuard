@@ -30,7 +30,7 @@ export default function CodeCheck() {
   }
   setError(reviewError);
  }
- useEffect(()=>{refresh();},[]); useEffect(()=>{if(chatRef.current)chatRef.current.scrollTo({top:chatRef.current.scrollHeight,behavior:'smooth'});},[messages,chatBusy]);
+ useEffect(()=>{refresh();},[]); useEffect(()=>{if(messages.length)requestAnimationFrame(()=>chatPanelRef.current?.scrollIntoView({behavior:'smooth',block:'end'}));},[messages,chatBusy]);
  const list=useMemo(()=>reviews.filter(r=>nameOf(r).toLowerCase().includes(query.toLowerCase())),[reviews,query]), findings=findingsOf(selected);
  const historyItems=useMemo(()=>[
   ...reviews.map(r=>({kind:'review',key:'review-'+r.id,date:dateOf(r),title:nameOf(r),review:r})),
