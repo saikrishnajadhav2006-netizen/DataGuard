@@ -278,15 +278,13 @@ public class ProjectController {
                 finding.setStatus("RESOLVED");
                 findingRepository.save(finding);
                 List<Finding> all = findingRepository.findByReviewId(reviewId);
-                int score = 100;
-                for (Finding item : all) {
-                    if ("RESOLVED".equalsIgnoreCase(item.getStatus())) continue;
-                    if ("CRITICAL".equalsIgnoreCase(item.getSeverity())) score -= 15;
-                    else if ("HIGH".equalsIgnoreCase(item.getSeverity())) score -= 10;
-                    else if ("MEDIUM".equalsIgnoreCase(item.getSeverity())) score -= 5;
-                    else score -= 2;
-                }
-                finding.getReview().setQualityScore(Math.max(0, score));
+                long unresolvedCount = all.stream()
+                        .filter(item -> !"RESOLVED".equalsIgnoreCase(item.getStatus()))
+                        .count();
+                // Keep the same score rule used for the initial scan. This makes each
+                // successfully resolved finding increase the displayed score by one.
+                int score = Math.max(1, 100 - (int) Math.min(99L, unresolvedCount));
+                finding.getReview().setQualityScore(score);
                 reviewRepository.save(finding.getReview());
                 return ResponseEntity.ok(Map.of(
                         "message", "A safe fix was applied to the uploaded project file.",
